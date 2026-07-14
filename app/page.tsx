@@ -1,136 +1,82 @@
-'use client'; // পপ-আপ ফর্মের ক্লিকের কাজ করার জন্য এটি প্রয়োজন
-
-import Header from '@/components/Header';
-import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
-  // বুকিং ফর্ম খোলা বা বন্ধ রাখার স্টেট
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const featuredProducts = [
+    { id: 1, name: 'Aviator Gold Edition', price: '৳ ৪,৫০০', img: '🕶️' },
+    { id: 2, name: 'Wayfarer Matte Black', price: '৳ ৩,৯০০', img: '🕶️' },
+    { id: 3, name: 'Clubmaster Vintage', price: '৳ ২,৭০০', img: '🕶️' },
+    { id: 4, name: 'Hexagonal Trendy', price: '৳ ২,৮০০', img: '🕶️' },
+  ];
 
   return (
-    <>
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-amber-950 text-slate-100 flex flex-col justify-between">
       
-      <main className="min-h-screen bg-white flex flex-col items-center justify-center text-center px-6">
-        <h1 className="text-5xl font-bold text-blue-900">
-          👓 Eye Point Optics
-        </h1>
+      {/* মূল হিরো সেকশন */}
+      <main className="mx-auto max-w-7xl px-4 py-12 md:px-8 flex-grow">
         
-        <p className="mt-4 text-xl text-gray-600">
-          Welcome to Eye Point Optics
-        </p>
-        
-        <p className="mt-2 text-gray-500">
-          Premium Eyeglasses • Sunglasses • Eye Test
-        </p>
-        
-        {/* এই বাটনে ক্লিক করলে ফর্ম ওপেন হবে */}
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="mt-8 rounded-lg bg-blue-900 px-6 py-3 text-white hover:bg-blue-700 font-semibold transition"
-        >
-          Book an Eye Test
-        </button>
-      </main>
-
-      {/* ১. আমাদের সেবাসমূহ (Our Services) */}
-      <section className="py-16 bg-gray-50 text-center">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">Our Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 bg-white border rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="text-4xl mb-4">👓</div>
-              <h3 className="text-xl font-semibold mb-2">Premium Eyeglasses</h3>
-              <p className="text-gray-600">Find the perfect pair from our wide collection of prescription glasses.</p>
-            </div>
-            <div className="p-6 bg-white border rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="text-4xl mb-4">🕶️</div>
-              <h3 className="text-xl font-semibold mb-2">Trendy Sunglasses</h3>
-              <p className="text-gray-600">Protect your eyes in style with our latest UV-protection sunglasses.</p>
-            </div>
-            <div className="p-6 bg-white border rounded-xl shadow-sm hover:shadow-md transition">
-              <div className="text-4xl mb-4">👁️</div>
-              <h3 className="text-xl font-semibold mb-2">Expert Eye Test</h3>
-              <p className="text-gray-600">Book an appointment with our certified optometrists for a precise checkup.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ২. পপ-আপ বুকিং ফর্ম (Modal) */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 relative">
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
-            >
-              ✕
+        {/* সার্চ এবং ট্যাগলাইন */}
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <p className="text-amber-400 font-semibold tracking-[0.25em] text-xs uppercase mb-3">Premium Eyewear</p>
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-6">
+            FIND YOUR PERFECT LOOK
+          </h1>
+          
+          {/* সার্চ বার */}
+          <div className="relative max-w-md mx-auto">
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              className="w-full bg-white/5 border border-amber-500/30 rounded-full px-6 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all text-sm"
+            />
+            <button className="absolute right-2 top-2 bg-amber-500 hover:bg-amber-600 text-slate-950 p-2 rounded-full transition-colors">
+              🔍
             </button>
-            <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">Book an Appointment</h3>
-            <form onSubmit={(e) => { e.preventDefault(); alert('Booking Confirmed!'); setIsOpen(false); }} className="space-y-4 text-left">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                <input type="text" placeholder="John Doe" className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-900" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="tel" placeholder="017XXXXXXXX" className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-900" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
-                <input type="date" className="w-full border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-900" required />
-              </div>
-              <button type="submit" className="w-full bg-blue-900 hover:bg-blue-800 text-white font-medium py-2.5 rounded-lg transition">
-                Confirm Booking
-              </button>
-            </form>
           </div>
         </div>
-      )}
 
-      {/* ৩. কাস্টমার রিভিউ (Testimonials) */}
-      <section className="py-16 bg-white text-center">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">What Our Customers Say</h2>
-          <p className="text-gray-500 mb-8">Read reviews from our satisfied clients</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="p-6 border rounded-xl shadow-sm bg-gray-50">
-                <div className="text-yellow-400 text-lg mb-2">⭐⭐⭐⭐•</div>
-                <p className="text-gray-600 italic mb-4">
-                  "The eye test was very precise, and they have an amazing collection of premium frames. Highly recommended!"
-                </p>
-                <h4 className="font-semibold text-gray-800">Customer Name {item}</h4>
-                <span className="text-xs text-gray-400">Verified Buyer</span>
+        {/* প্রোডাক্ট গ্রিড সেকশন */}
+        <div className="mb-16">
+          <h2 className="text-xl md:text-2xl font-bold text-amber-400 tracking-widest uppercase mb-8 text-center md:text-left">
+            Featured Frames
+          </h2>
+          
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {featuredProducts.map((product) => (
+              <div 
+                key={product.id} 
+                className="bg-slate-900/60 backdrop-blur border border-amber-500/20 rounded-2xl p-4 md:p-6 flex flex-col justify-between transition-all hover:scale-[1.02] hover:border-amber-400/50 shadow-lg hover:shadow-amber-500/5"
+              >
+                <div className="bg-slate-950/80 rounded-xl h-36 md:h-48 flex items-center justify-center text-4xl md:text-6xl border border-amber-500/10 mb-4">
+                  {product.img}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm md:text-base text-slate-200 line-clamp-1 mb-1">{product.name}</h3>
+                  <p className="text-amber-400 font-bold text-xs md:text-sm mb-4">{product.price}</p>
+                </div>
+                <Link href="/contact">
+                  <button className="w-full bg-amber-500/10 border border-amber-500/40 text-amber-400 font-semibold text-xs md:text-sm py-2.5 rounded-lg hover:bg-amber-500 hover:text-slate-950 transition-all">
+                    View Details
+                  </button>
+                </Link>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* ৪. ফুটার (Footer Section) */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-          <div>
-            <h3 className="text-lg font-bold mb-3">Eye Point Optics</h3>
-            <p className="text-gray-400 text-sm">Your vision is our priority. Providing the best eyewear and eye care services.</p>
+      </main>
+
+      {/* ফুটার সোশ্যাল আইকন */}
+      <footer className="border-t border-amber-500/10 bg-slate-950/60 py-6">
+        <div className="mx-auto max-w-7xl px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-slate-500 text-xs">© 2026 Eye Point Optics. All rights reserved.</p>
+          <div className="flex gap-6 text-slate-400 text-lg">
+            <a href="#" className="hover:text-amber-400 transition-colors">📘 Facebook</a>
+            <a href="#" className="hover:text-amber-400 transition-colors">📸 Instagram</a>
+            <a href="#" className="hover:text-amber-400 transition-colors">🎥 YouTube</a>
           </div>
-          <div>
-            <h3 className="text-lg font-bold mb-3">Contact Us</h3>
-            <p className="text-gray-400 text-sm">📍 Dhaka, Bangladesh</p>
-            <p className="text-gray-400 text-sm">📞 +880 1700-000000</p>
-          </div>
-          <div>
-            <h3 className="text-lg font-bold mb-3">Opening Hours</h3>
-            <p className="text-gray-400 text-sm">Sat - Thu: 10:00 AM - 9:00 PM</p>
-            <p className="text-gray-400 text-sm text-red-400">Friday: Closed</p>
-          </div>
-        </div>
-        <div className="border-t border-gray-800 text-center text-xs text-gray-500 mt-8 pt-4">
-          © {new Date().getFullYear()} Eye Point Optics. All rights reserved.
         </div>
       </footer>
-    </>
+
+    </div>
   );
 }
