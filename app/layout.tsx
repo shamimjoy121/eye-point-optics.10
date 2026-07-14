@@ -1,16 +1,32 @@
-import Link from 'next/link';
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
-export default function Navbar() {
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Eye Point Optics",
+  description: "Premium Eyeglasses, Sunglasses, and Eye Test",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <nav className="flex justify-between items-center p-6 bg-white shadow-md">
-      <div className="font-bold text-xl text-blue-900">Eye Point Optics</div>
-      <div className="flex gap-6">
-        <Link href="/">Home</Link>
-        <Link href="/frames">Frames</Link>
-        <Link href="/sunglasses">Sunglasses</Link>
-        <Link href="/eye-test">Eye Test</Link>
-        <Link href="/contact">Contact</Link>
-      </div>
-    </nav>
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+      </body>
+    </html>
   );
 }
