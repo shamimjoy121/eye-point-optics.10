@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "../components/Header"; // এখানে হেডারটি ইমপোর্ট করা হলো
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Eye Point Optics",
-  description: "Premium Eyeglasses, Sunglasses, and Eye Test",
+  description: "Premium Eyewear Store",
 };
 
 export default function RootLayout({
@@ -24,8 +25,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-100`}>
+        {/* এখানে হেডারটি বসানো হলো, যেন সব পেজে মেনু ও নোটিফিকেশন দেখায় */}
+        <Header /> 
+        <main>
+          {children}
+        </main>
       </body>
     </html>
   );
