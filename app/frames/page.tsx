@@ -100,7 +100,7 @@ export default function FramesPage() {
                 <div className="flex-1 flex flex-col justify-between">
                   {/* ইমেজ জুম বক্স */}
                   <div className="bg-slate-950 p-4 flex items-center justify-center h-56 relative border-b border-slate-800/40" onClick={(e) => e.stopPropagation()}>
-                    <Zoom overlayBgColorEnd="rgba(10, 10, 20, 0.95)" zoomMargin={10}>
+                    <Zoom zoomMargin={10}>
                       <img src={product.img} alt={product.name} className="max-h-52 max-w-full object-contain transform group-hover:scale-105 transition duration-300 rounded-lg cursor-zoom-in" />
                     </Zoom>
                   </div>
