@@ -1,105 +1,43 @@
-import { createClient } from '@supabase/supabase-js'
-import Header from '@/components/Header'
-import Link from 'next/link'
+'use client';
 
-export default async function Home() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  const { data: products } = await supabase
-    .from('products')
-    .select('*')
-    .order('id', { ascending: false })
+export default function SunglassesPage() {
+  const sunglasses = [
+    { id: 1, name: 'Polarized Aviator Classic', price: '৳২,২০০', tag: 'UV400 Protected' },
+    { id: 2, name: 'Wayfarer Dark Matte', price: '৳১,৮০০', tag: 'Polarized' },
+    { id: 3, name: 'Hexagonal Gold Frame Sun', price: '৳২,৫০০', tag: 'Trendy' },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <Header />
-      
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        {/* হিরো সেকশন */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-black text-white mb-4">👓 EP OPTICS</h1>
-          <p className="text-slate-400 text-lg mb-8">প্রিমিয়াম চশমা এবং সানগ্লাসের সেরা কালেকশন</p>
-          
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/frames"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition"
-            >
-              👓 ফ্রেম দেখুন
-            </Link>
-            <Link
-              href="/sunglasses"
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition"
-            >
-              🕶️ সানগ্লাস দেখুন
-            </Link>
-          </div>
-        </div>
+    <main className="max-w-7xl mx-auto px-6 py-12 space-y-10">
+      <div className="text-center space-y-3">
+        <h1 className="text-4xl font-black text-white">প্রিমিয়াম সানগ্লাস কালেকশন</h1>
+        <p className="text-slate-400">চোখের সম্পূর্ণ সুরক্ষায় ও ফ্যাশনে সেরা সানগ্লাস</p>
+      </div>
 
-        {/* পণ্য গ্রিড */}
-        {products && products.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.id}`}
-                className="group"
-              >
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-blue-600 transition">
-                  {/* ছবি */}
-                  <div className="relative h-64 bg-slate-800 overflow-hidden">
-                    <img
-                      src={product.img}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                    />
-                    <span className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold">
-                      {product.category === 'frames' ? '👓 ফ্রেম' : '🕶️ সানগ্লাস'}
-                    </span>
-                  </div>
-
-                  {/* বিবরণ */}
-                  <div className="p-6">
-                    <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition">
-                      {product.name}
-                    </h3>
-                    <p className="text-blue-400 font-bold text-xl mb-4">৳{product.price}</p>
-                    {product.description && (
-                      <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-                        {product.description}
-                      </p>
-                    )}
-                    
-                    {/* অর্ডার বাটন */}
-                    <a
-                      href={`https://wa.me/8801779666030?text=আমি%20এই%20পণ্যটি%20অর্ডার%20করতে%20চাই:%20${product.name}%20(৳${product.price})`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition text-center"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      📱 WhatsApp এ অর্ডার করুন
-                    </a>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-slate-400 text-lg mb-6">কোনো পণ্য পাওয়া যায়নি</p>
-            <Link
-              href="/admin"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sunglasses.map((item) => (
+          <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 hover:border-blue-500/50 transition">
+            <div className="aspect-video bg-slate-950 rounded-xl flex items-center justify-center text-4xl border border-slate-800/80">
+              🕶️
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+                {item.tag}
+              </span>
+              <h3 className="text-lg font-bold text-white mt-2">{item.name}</h3>
+              <p className="text-emerald-400 font-bold text-xl mt-1">{item.price}</p>
+            </div>
+            <a
+              href={`https://wa.me/8801779666030?text=${encodeURIComponent(`হ্যালো EP OPTICS! আমি "${item.name}" সানগ্লাসটি কিনতে আগ্রহী।`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center bg-slate-800 hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl transition text-sm"
             >
-              পণ্য যোগ করুন
-            </Link>
+              WhatsApp-এ অর্ডার করুন
+            </a>
           </div>
-        )}
-      </main>
-    </div>
-  )
+        ))}
+      </div>
+    </main>
+  );
 }

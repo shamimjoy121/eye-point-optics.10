@@ -1,36 +1,25 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Header from "../components/Header"; // এখানে হেডারটি ইমপোর্ট করা হলো
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from 'next';
+import './globals.css';
+import Header from '@/components/Header';
 
 export const metadata: Metadata = {
-  title: "Eye Point Optics",
-  description: "Premium Eyewear Store",
+  title: 'Eye Point Optics - Premium Eyewear & Eye Test',
+  description: 'Eye Point Optics, Nikunja-2, Dhaka. Specialized Eye Test & Premium Eyewear.',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-100`}>
-        {/* এখানে হেডারটি বসানো হলো, যেন সব পেজে মেনু ও নোটিফিকেশন দেখায় */}
-        <Header /> 
-        <main>
-          {children}
-        </main>
+    <html lang="bn">
+      <body className="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1">{children}</div>
+        <footer className="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+          © {new Date().getFullYear()} Eye Point Optics (Nikunja-2). All rights reserved.
+        </footer>
       </body>
     </html>
   );
