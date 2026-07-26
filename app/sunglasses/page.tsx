@@ -1,17 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 
-const sunglassesData = [
-  { id: 1, name: "Polarized Aviator", type: "UV400 Protection", price: "৳৩,৫০০", tag: "Best Seller" },
-  { id: 2, name: "Classic Wayfarer", type: "Anti-Glare", price: "৳২,৯০০", tag: "Trending" },
-  { id: 3, name: "Luxury Oversized", type: "Gradient Lens", price: "৳৪,২০০", tag: "Exclusive" },
-  { id: 4, name: "Sport Shield", type: "Unbreakable TR90", price: "৳৩,৮০০", tag: "New" },
-];
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "YOUR_SUPABASE_URL";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "YOUR_SUPABASE_ANON_KEY";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function SunglassesPage() {
+  const [sunglassesData, setSunglassesData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const filtered = sunglassesData.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const [loading, setLoading] = useState(true);
+
+  // সুপাবেজ থেকে Sunglasses ক্যাটাগরির ডেটা ফেচ করা
+  useEffect(() => {
+    async function fetchSunglasses() {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("category", "Sunglasses");
+
+        if (error) {
+          console.error("Error fetching sunglasses:", error);
+        } else if (data) {
+          setSunglassesData(data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSunglasses();
+  }, []);
+
+  const filtered = sunglassesData.filter((item) =>
+    item.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <main className="bg-slate-950 text-white min-h-screen py-16">
@@ -34,33 +61,45 @@ export default function SunglassesPage() {
           />
         </div>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 mt-16">
-          {filtered.map((item) => (
-            <div key={item.id} className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
-              <div>
-                <div className="relative h-64 bg-slate-800 flex items-center justify-center text-6xl">
-                  🕶️
-                  <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">{item.tag}</span>
+        {loading ? (
+          <div className="text-center mt-16 text-slate-400">Loading sunglasses...</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center mt-16 text-slate-400">No sunglasses found in database.</div>
+        ) : (
+          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 mt-16">
+            {filtered.map((item) => (
+              <div key={item.id} className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
+                <div>
+                  <div className="relative h-64 bg-slate-800 flex items-center justify-center">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-6xl">🕶️</span>
+                    )}
+                    <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                      {item.sub_category || "Sunglasses"}
+                    </span>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold">{item.name}</h3>
+                    <p className="text-slate-400 mt-2 text-sm">{item.description || item.sub_category || "UV400 Protection"}</p>
+                    <p className="text-blue-400 font-black text-lg mt-4">৳{item.price}</p>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold">{item.name}</h3>
-                  <p className="text-slate-400 mt-2 text-sm">{item.type}</p>
-                  <p className="text-blue-400 font-black text-lg mt-4">{item.price}</p>
+                <div className="p-6 pt-0">
+                  <a
+                    href={`https://wa.me/8801XXXXXXXXX?text=${encodeURIComponent(`I want to order Sunglasses: ${item.name} (৳${item.price})`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full block text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition"
+                  >
+                    Order on WhatsApp
+                  </a>
                 </div>
               </div>
-              <div className="p-6 pt-0">
-                <a
-                  href={`https://wa.me/8801XXXXXXXXX?text=I want to order: ${item.name} (${item.price})`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full block text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition"
-                >
-                  Order on WhatsApp
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

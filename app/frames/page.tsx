@@ -1,24 +1,59 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/supabaseClient";
 
-// ডামি প্রোডাক্ট ডেটা (পরবর্তীতে অ্যাডমিন প্যানেল বা ডাটাবেজ থেকে আসবে)
-const framesData = [
-  { id: 1, name: "Titanium Minimalist", type: "TR90 Lightweight", price: "৳২,৫০০", tag: "Best Seller" },
-  { id: 2, name: "Classic Aviator", type: "Metal Frame", price: "৳৩,০০০", tag: "New" },
-  { id: 3, name: "Modern Cat-Eye", type: "Acetate", price: "৳২,৮০০", tag: "Trending" },
-  { id: 4, name: "Executive Round", type: "Classic Metal", price: "৳৩,৫০০", tag: "Premium" },
-  { id: 5, name: "Flexible Sport", type: "TR90 Flex", price: "৳২,২০০", tag: "Popular" },
-  { id: 6, name: "Vintage Square", type: "Premium Acetate", price: "৳৩,২০০", tag: "Exclusive" },
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  sub_category?: string;
+  image_url: string;
+}
 
 export default function FramesPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const filteredFrames = framesData.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ফ্রেমের সাব-ক্যাটাগরি লিস্ট
+  const subCategories = [
+    "All",
+    "Metal Full Frame",
+    "Metal Half Frame",
+    "Cell Frame",
+    "Rimless",
+    "Baby Frame"
+  ];
+
+  // Supabase থেকে শুধুমাত্র 'Frames' ক্যাটাগরির প্রোডাক্টগুলো আনা
+  const fetchFrames = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("category", "Frames")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setProducts(data);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchFrames();
+  }, []);
+
+  // সাব-ক্যাটাগরি এবং সার্চ দিয়ে ফিল্টার করা
+  const filteredFrames = products.filter((item) => {
+    const matchesSubCategory =
+      selectedSubCategory === "All" || item.sub_category === selectedSubCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSubCategory && matchesSearch;
+  });
 
   return (
     <main className="bg-slate-950 text-white min-h-screen py-16">
@@ -37,8 +72,25 @@ export default function FramesPage() {
           </p>
         </div>
 
-        {/* Search & Filter Bar */}
-        <div className="mt-12 flex justify-center">
+        {/* Filter Tabs (সাব-ক্যাটাগরি বাটনগুলো) */}
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          {subCategories.map((subCat) => (
+            <button
+              key={subCat}
+              onClick={() => setSelectedSubCategory(subCat)}
+              className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 border ${
+                selectedSubCategory === subCat
+                  ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/30"
+                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
+              }`}
+            >
+              {subCat}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Bar */}
+        <div className="mt-8 flex justify-center">
           <input
             type="text"
             placeholder="Search frames by name..."
@@ -48,36 +100,55 @@ export default function FramesPage() {
           />
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <p className="text-center text-slate-400 mt-16 text-lg">Loading frames...</p>
+        )}
+
         {/* Product Grid */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-16">
-          {filteredFrames.map((frame) => (
-            <div key={frame.id} className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
-              <div>
-                <div className="relative h-72 bg-slate-800 flex items-center justify-center text-7xl">
-                  👓
-                  <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                    {frame.tag}
-                  </span>
+        {!loading && (
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-16">
+            {filteredFrames.map((frame) => (
+              <div key={frame.id} className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
+                <div>
+                  <div className="relative h-72 bg-slate-900 flex items-center justify-center overflow-hidden">
+                    {frame.image_url ? (
+                      <img
+                        src={frame.image_url}
+                        alt={frame.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-7xl">👓</span>
+                    )}
+                    <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase">
+                      {frame.sub_category || "Frame"}
+                    </span>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-2xl font-bold">{frame.name}</h3>
+                    <p className="text-blue-400 font-black text-xl mt-4">৳ {frame.price}</p>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold">{frame.name}</h3>
-                  <p className="text-slate-400 mt-2">{frame.type}</p>
-                  <p className="text-blue-400 font-black text-xl mt-4">{frame.price}</p>
+                <div className="p-6 pt-0 flex gap-4">
+                  <a
+                    href={`https://wa.me/8801XXXXXXXXX?text=I want to order this frame: ${frame.name} (Price: ৳${frame.price})`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition"
+                  >
+                    Order on WhatsApp
+                  </a>
                 </div>
               </div>
-              <div className="p-6 pt-0 flex gap-4">
-                <a
-                  href={`https://wa.me/8801XXXXXXXXX?text=I want to order this frame: ${frame.name} (${frame.price})`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition"
-                >
-                  Order on WhatsApp
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* No Products Found */}
+        {!loading && filteredFrames.length === 0 && (
+          <p className="text-center text-slate-500 mt-16 text-lg">No frames found in this category.</p>
+        )}
 
       </div>
     </main>

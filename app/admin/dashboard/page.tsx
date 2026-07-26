@@ -9,6 +9,7 @@ interface Product {
   name: string;
   price: number;
   category: string;
+  sub_category?: string;
   image_url: string;
 }
 
@@ -18,8 +19,39 @@ export default function AdminDashboard() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // সাব-ক্যাটাগরি লিস্ট
+  const frameSubCategories = [
+    "Metal Full Frame",
+    "Metal Half Frame",
+    "Cell Frame",
+    "Rimless",
+    "Baby Frame"
+  ];
+
+  const powerGlassTypes = [
+    "Bifocal - White",
+    "Bifocal - Multicoated",
+    "Bifocal - Photosun",
+    "Bifocal - Photosun Multicoated",
+    "Bifocal - Blue Cut",
+    "Bifocal - Photosun Blue Cut",
+    "Progressive - White",
+    "Progressive - Multicoated",
+    "Progressive - Photosun",
+    "Progressive - Photosun Multicoated",
+    "Progressive - Blue Cut",
+    "Progressive - Photosun Blue Cut",
+    "Single Vision - White",
+    "Single Vision - Multicoated",
+    "Single Vision - Photosun",
+    "Single Vision - Photosun Multicoated",
+    "Single Vision - Blue Cut",
+    "Single Vision - Photosun Blue Cut"
+  ];
 
   const getProducts = async () => {
     const { data, error } = await supabase
@@ -51,6 +83,7 @@ export default function AdminDashboard() {
       alert(error.message);
       return "";
     }
+    
     const { data } = supabase.storage.from("products").getPublicUrl(fileName);
     return data.publicUrl;
   };
@@ -59,7 +92,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       if (!name || !price || !category || !image) {
-        alert("সবগুলো ঘর পুরন করুন এবং ছবি নির্বাচন করুন!");
+        alert("সবগুলো ঘর পূরণ করুন এবং ছবি নির্বাচন করুন!");
         return;
       }
 
@@ -71,6 +104,7 @@ export default function AdminDashboard() {
           name,
           price: Number(price),
           category,
+          sub_category: subCategory || "",
           image_url: imageUrl,
         },
       ]);
@@ -84,6 +118,7 @@ export default function AdminDashboard() {
       setName("");
       setPrice("");
       setCategory("");
+      setSubCategory("");
       setImage(null);
       getProducts();
     } catch (err) {
@@ -139,16 +174,57 @@ export default function AdminDashboard() {
               />
             </div>
 
+            {/* Main Category Dropdown */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
-              <input
-                type="text"
-                placeholder="Category"
+              <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setSubCategory(""); // ক্যাটাগরি বদলালে সাব-ক্যাটাগরি রিসেট হবে
+                }}
                 className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
-              />
+              >
+                <option value="">Select Category</option>
+                <option value="Frames">Frames</option>
+                <option value="Sunglasses">Sunglasses</option>
+                <option value="Power Glasses">Power Glasses</option>
+                <option value="Contact Lenses">Contact Lenses</option>
+              </select>
             </div>
+
+            {/* Dynamic Sub-Category / Quality Dropdown (Frames বা Power Glasses সিলেクト করলে আসবে) */}
+            {category === "Frames" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Frame Type</label>
+                <select
+                  value={subCategory}
+                  onChange={(e) => setSubCategory(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Select Frame Type</option>
+                  {frameSubCategories.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {category === "Power Glasses" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Power Glass Quality & Type</label>
+                <select
+                  value={subCategory}
+                  onChange={(e) => setSubCategory(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Select Power Glass Type</option>
+                  {powerGlassTypes.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Product Image</label>
@@ -187,7 +263,9 @@ export default function AdminDashboard() {
                   />
                   <h3 className="font-semibold text-white text-lg">{product.name}</h3>
                   <p className="text-blue-400 font-bold mt-1">৳ {product.price}</p>
-                  <p className="text-slate-400 text-xs mt-1">{product.category}</p>
+                  <p className="text-slate-400 text-xs mt-1 uppercase">
+                    {product.category} {product.sub_category ? `> ${product.sub_category}` : ""}
+                  </p>
                 </div>
 
                 <button
