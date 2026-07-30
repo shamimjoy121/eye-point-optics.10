@@ -10,7 +10,7 @@ interface Product {
   price: number;
   category: string;
   sub_category?: string;
-  image_url: string;
+  image_url?: string;
 }
 
 export default function AdminDashboard() {
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
               </select>
             </div>
 
-            {/* Dynamic Sub-Category / Quality Dropdown (Frames বা Power Glasses সিলেクト করলে আসবে) */}
+            {/* Dynamic Sub-Category Dropdown */}
             {category === "Frames" && (
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Frame Type</label>
@@ -256,11 +256,19 @@ export default function AdminDashboard() {
             {products.map((product) => (
               <div key={product.id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                 <div>
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full h-44 object-cover rounded-lg mb-4 bg-slate-900"
-                  />
+                  {/* Image with Safety Fallback */}
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-44 object-cover rounded-lg mb-4 bg-slate-900"
+                    />
+                  ) : (
+                    <div className="w-full h-44 rounded-lg mb-4 bg-slate-900 flex items-center justify-center text-slate-500 text-xs border border-slate-800">
+                      No Image Available
+                    </div>
+                  )}
+
                   <h3 className="font-semibold text-white text-lg">{product.name}</h3>
                   <p className="text-blue-400 font-bold mt-1">৳ {product.price}</p>
                   <p className="text-slate-400 text-xs mt-1 uppercase">

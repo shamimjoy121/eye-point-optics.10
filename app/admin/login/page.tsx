@@ -13,7 +13,7 @@ export default function AdminLogin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (username === "eyepointoptics11@gmail.com" && password === "eyepointoptics11.2220") {
+    if (username === "shamim" && password === "01779666030@") {
       localStorage.setItem("isAdmin", "true");
       router.push("/admin/dashboard");
     } else {

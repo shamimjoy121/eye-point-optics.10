@@ -9,7 +9,7 @@ interface Product {
   name: string;
   price: number;
   category: string;
-  image_url: string;
+  image_url?: string;
 }
 
 export default function Home() {
@@ -61,11 +61,19 @@ export default function Home() {
               {products.map((product) => (
                 <div key={product.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
                   <div>
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded-xl mb-4 bg-slate-950"
-                    />
+                    {/* Image handling with fallback */}
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-48 object-cover rounded-xl mb-4 bg-slate-950"
+                      />
+                    ) : (
+                      <div className="w-full h-48 rounded-xl mb-4 bg-slate-950 flex items-center justify-center text-slate-600 text-xs border border-slate-800">
+                        No Image Available
+                      </div>
+                    )}
+
                     <span className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-md font-medium">
                       {product.category}
                     </span>
