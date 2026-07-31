@@ -1,68 +1,88 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+export const dynamic = 'force-dynamic';
 
-export default function AdminLogin() {
-  const router = useRouter();
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+// Vercel-এর Environment Variable থেকে Supabase Connect করা
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+export default function AdminProductsPage() {
+  const [products, setProducts] = useState<any[]>([]);
 
-    if (username === "shamim" && password === "01779666030@") {
-      localStorage.setItem("isAdmin", "true");
-      router.push("/admin/dashboard");
-    } else {
-      setError("Invalid username or password");
+  // Supabase থেকে ডাটা ফেচ করার ফাংশন
+  const getProducts = async () => {
+    if (!supabaseUrl || !supabaseAnonKey) return;
+    const { data, error } = await supabase.from('products').select('*');
+    if (error) {
+      console.error('Error fetching products:', error.message);
+      return;
     }
+    if (data) setProducts(data);
   };
 
+  useEffect(() => {
+    getProducts();
+  }, []);
+
   return (
-    <main className="min-h-screen bg-slate-950 flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-8">
-        <h1 className="text-3xl font-black text-white text-center">
-          Admin Login
-        </h1>
+    <div className="p-6 bg-slate-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold text-slate-800 mb-6">All Products</h1>
 
-        <p className="text-slate-400 text-center mt-2">
-          Eye Point Optics Dashboard
-        </p>
+        {/* Grid Layout for Products */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {products.map((product) => (
+            <div 
+              key={product.id} 
+              className="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-300 border border-slate-100 flex flex-col"
+            >
+              {/* Image Container with Hover Zoom */}
+              <div className="relative w-full h-56 rounded-xl overflow-hidden bg-slate-100 mb-4">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
+                />
+              </div>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-4">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full rounded-xl bg-slate-950 border border-slate-700 px-4 py-3 text-white focus:outline-none focus:border-blue-500"
-          />
+              {/* Product Details */}
+              <div className="flex-1">
+                <h3 className="font-bold text-lg text-slate-800 line-clamp-1">{product.name}</h3>
+                <p className="text-2xl font-extrabold text-blue-600 mt-2">৳ {product.price}</p>
+              </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl bg-slate-950 border border-slate-700 px-4 py-3 text-white focus:outline-none focus:border-blue-500"
-          />
+              {/* Delete Button */}
+              <button
+                onClick={async () => {
+                  const ok = confirm("Are you sure you want to delete this product?");
+                  if (!ok) return;
 
-          {error && (
-            <p className="text-red-400 text-sm">
-              {error}
-            </p>
-          )}
+                  const { error } = await supabase
+                    .from("products")
+                    .delete()
+                    .eq("id", product.id);
 
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-blue-600 py-3 font-bold text-white hover:bg-blue-500 transition"
-          >
-            Login
-          </button>
-        </form>
+                  if (error) alert(error.message);
+                  else getProducts();
+                }}
+                className="mt-5 w-full bg-slate-50 text-red-600 hover:bg-red-500 hover:text-white py-2.5 rounded-xl font-bold transition-colors duration-300 border border-slate-200 hover:border-transparent"
+              >
+                Delete Product
+              </button>
+            </div>
+          ))}
+        </div>
+        
+        {products.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-slate-400 text-lg">No products found. Add some awesome products!</p>
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   );
 }
