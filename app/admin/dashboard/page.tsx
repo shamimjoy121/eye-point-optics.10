@@ -1,307 +1,135 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/supabaseClient";
-import { useRouter } from "next/navigation";
+export const dynamic = 'force-dynamic';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  sub_category?: string;
-  image_url?: string;
-}
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 
-export default function AdminDashboard() {
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export default function AdminDashboardPage() {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("");
-  const [subCategory, setSubCategory] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
-  // সাব-ক্যাটাগরি লিস্ট
-  const frameSubCategories = [
-    "Metal Full Frame",
-    "Metal Half Frame",
-    "Cell Frame",
-    "Rimless",
-    "Baby Frame"
-  ];
-
-  const powerGlassTypes = [
-    "Bifocal - White",
-    "Bifocal - Multicoated",
-    "Bifocal - Photosun",
-    "Bifocal - Photosun Multicoated",
-    "Bifocal - Blue Cut",
-    "Bifocal - Photosun Blue Cut",
-    "Progressive - White",
-    "Progressive - Multicoated",
-    "Progressive - Photosun",
-    "Progressive - Photosun Multicoated",
-    "Progressive - Blue Cut",
-    "Progressive - Photosun Blue Cut",
-    "Single Vision - White",
-    "Single Vision - Multicoated",
-    "Single Vision - Photosun",
-    "Single Vision - Photosun Multicoated",
-    "Single Vision - Blue Cut",
-    "Single Vision - Photosun Blue Cut"
-  ];
-
-  const getProducts = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error && data) {
-      setProducts(data);
-    }
-  };
-
+  // ১. সিকিউরিটি চেক: লগইন করা না থাকলে সরাসরি লগইন পেজে পাঠিয়ে দেবে
   useEffect(() => {
-    getProducts();
-  }, []);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/admin/login'); // লগইন ছাড়া ঢুকতে দেবে না
+      } else {
+        setAuthenticated(true);
+      }
+      setLoading(false);
+    };
 
+    checkAuth();
+  }, [router]);
+
+  // ২. লগআউট ফাংশন
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem("isAdmin");
-    router.push("/admin/login");
+    router.push('/admin/login');
   };
 
-  const uploadImage = async () => {
-    if (!image) return "";
-    const fileName = `${Date.now()}-${image.name}`;
-    const { error } = await supabase.storage.from("products").upload(fileName, image);
+  // লোডিং অবস্থা
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+        <p className="text-lg font-semibold animate-pulse">Verifying Admin Access...</p>
+      </div>
+    );
+  }
 
-    if (error) {
-      alert(error.message);
-      return "";
-    }
-    
-    const { data } = supabase.storage.from("products").getPublicUrl(fileName);
-    return data.publicUrl;
-  };
-
-  const handleAddProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!name || !price || !category || !image) {
-        alert("সবগুলো ঘর পূরণ করুন এবং ছবি নির্বাচন করুন!");
-        return;
-      }
-
-      setLoading(true);
-      const imageUrl = await uploadImage();
-
-      const { error } = await supabase.from("products").insert([
-        {
-          name,
-          price: Number(price),
-          category,
-          sub_category: subCategory || "",
-          image_url: imageUrl,
-        },
-      ]);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      alert("✅ Product Added Successfully!");
-      setName("");
-      setPrice("");
-      setCategory("");
-      setSubCategory("");
-      setImage(null);
-      getProducts();
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!authenticated) return null;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 md:p-10 font-sans">
-      <div className="max-w-6xl mx-auto space-y-8">
-        
-        {/* Header Bar */}
-        <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      {/* 🟢 অ্যাডমিন মেনু বার (Top Navbar) */}
+      <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-6">
+          <h1 className="text-xl font-bold text-blue-400">Eye Point Optics</h1>
+          <nav className="flex space-x-4">
+            <a href="/admin/dashboard" className="text-sm font-semibold text-blue-400 border-b-2 border-blue-400 pb-1">
+              Dashboard
+            </a>
+            <a href="/admin/product" className="text-sm font-semibold text-slate-300 hover:text-blue-400 transition-colors">
+              All Products
+            </a>
+            <a href="/" target="_blank" className="text-sm font-semibold text-slate-300 hover:text-blue-400 transition-colors flex items-center gap-1">
+              Visit Store ↗
+            </a>
+          </nav>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-bold text-sm transition-all self-start md:self-auto border border-red-500/30"
+        >
+          Logout
+        </button>
+      </header>
+
+      {/* 🔵 ড্যাশবোর্ড কন্টেন্ট */}
+      <main className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-slate-400 text-sm mt-1">Manage store products and settings</p>
+            <h2 className="text-2xl font-bold text-white">Admin Dashboard</h2>
+            <p className="text-slate-400 text-sm mt-1">Manage store products and settings securely.</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-5 py-2.5 rounded-xl font-medium transition-all duration-200"
-          >
-            Logout
-          </button>
         </div>
 
-        {/* Add Product Form */}
-        <div className="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-bold text-white mb-6">Add New Product</h2>
+        {/* প্রডাক্ট যোগ করার ফর্ম */}
+        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
+          <h3 className="text-xl font-bold text-white mb-4">Add New Product</h3>
           
-          <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Product Name</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Product Name</label>
               <input 
-                type="text"
-                placeholder="Product Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
+                type="text" 
+                placeholder="Product Name" 
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Price (৳)</label>
-              <input
-                type="number"
-                placeholder="Price"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
+              <label className="block text-sm font-medium text-slate-300 mb-1">Price (৳)</label>
+              <input 
+                type="number" 
+                placeholder="Price" 
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
               />
             </div>
+          </div>
 
-            {/* Main Category Dropdown */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setSubCategory(""); // ক্যাটাগরি বদলালে সাব-ক্যাটাগরি রিসেট হবে
-                }}
-                className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
-              >
-                <option value="">Select Category</option>
-                <option value="Frames">Frames</option>
-                <option value="Sunglasses">Sunglasses</option>
-                <option value="Power Glasses">Power Glasses</option>
-                <option value="Contact Lenses">Contact Lenses</option>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Category</label>
+              <select className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500">
+                <option>Select Category</option>
+                <option>Eyeglasses</option>
+                <option>Sunglasses</option>
+                <option>Contact Lenses</option>
               </select>
             </div>
-
-            {/* Dynamic Sub-Category Dropdown */}
-            {category === "Frames" && (
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Frame Type</label>
-                <select
-                  value={subCategory}
-                  onChange={(e) => setSubCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select Frame Type</option>
-                  {frameSubCategories.map((item, index) => (
-                    <option key={index} value={item}>{item}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {category === "Power Glasses" && (
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Power Glass Quality & Type</label>
-                <select
-                  value={subCategory}
-                  onChange={(e) => setSubCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select Power Glass Type</option>
-                  {powerGlassTypes.map((item, index) => (
-                    <option key={index} value={item}>{item}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Product Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)}
-                className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-xl p-2 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+              <label className="block text-sm font-medium text-slate-300 mb-1">Product Image</label>
+              <input 
+                type="file" 
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-300 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
               />
             </div>
-
-            <div className="md:col-span-2 mt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white font-semibold py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-600/20"
-              >
-                {loading ? "Adding Product..." : "Add Product"}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Product List */}
-        <div className="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-bold text-white mb-6">All Products ({products.length})</h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <div key={product.id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                <div>
-                  {/* Image with Safety Fallback */}
-                  {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-full h-44 object-cover rounded-lg mb-4 bg-slate-900"
-                    />
-                  ) : (
-                    <div className="w-full h-44 rounded-lg mb-4 bg-slate-900 flex items-center justify-center text-slate-500 text-xs border border-slate-800">
-                      No Image Available
-                    </div>
-                  )}
-
-                  <h3 className="font-semibold text-white text-lg">{product.name}</h3>
-                  <p className="text-blue-400 font-bold mt-1">৳ {product.price}</p>
-                  <p className="text-slate-400 text-xs mt-1 uppercase">
-                    {product.category} {product.sub_category ? `> ${product.sub_category}` : ""}
-                  </p>
-                </div>
-
-                <button
-                  onClick={async () => {
-                    if (confirm("Delete this product?")) {
-                      const { error } = await supabase
-                        .from("products")
-                        .delete()
-                        .eq("id", product.id);
-
-                      if (error) alert(error.message);
-                      else getProducts();
-                    }
-                  }}
-                  className="mt-4 w-full bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
           </div>
 
-          {products.length === 0 && (
-            <p className="text-slate-500 text-center py-8">No products found.</p>
-          )}
+          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors mt-4">
+            Add Product
+          </button>
         </div>
-
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
