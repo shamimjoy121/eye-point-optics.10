@@ -15,29 +15,24 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
-  // ১. সিকিউরিটি চেক: লগইন করা না থাকলে সরাসরি লগইন পেজে পাঠিয়ে দেবে
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
-        router.push('/admin/login'); // লগইন ছাড়া ঢুকতে দেবে না
+        router.push('/admin/login');
       } else {
         setAuthenticated(true);
       }
       setLoading(false);
     };
-
     checkAuth();
   }, [router]);
 
-  // ২. লগআউট ফাংশন
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/admin/login');
   };
 
-  // লোডিং অবস্থা
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
@@ -50,7 +45,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
-      {/* 🟢 অ্যাডমিন মেনু বার (Top Navbar) */}
+      {/* 🟢 অ্যাডমিন মেনু বার */}
       <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-6">
           <h1 className="text-xl font-bold text-blue-400">Eye Point Optics</h1>
@@ -68,32 +63,29 @@ export default function AdminDashboardPage() {
         </div>
         <button
           onClick={handleLogout}
-          className="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-bold text-sm transition-all self-start md:self-auto border border-red-500/30"
+          className="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-bold text-sm transition-all border border-red-500/30"
         >
           Logout
         </button>
       </header>
 
-      {/* 🔵 ড্যাশবোর্ড কন্টেন্ট */}
+      {/* 🔵 প্রোডাক্ট আপলোড ফর্ম */}
       <main className="p-6 max-w-7xl mx-auto space-y-6">
-        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Admin Dashboard</h2>
-            <p className="text-slate-400 text-sm mt-1">Manage store products and settings securely.</p>
-          </div>
+        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+          <h2 className="text-2xl font-bold text-white">Admin Dashboard</h2>
+          <p className="text-slate-400 text-sm mt-1">Manage store products and settings securely.</p>
         </div>
 
-        {/* প্রডাক্ট যোগ করার ফর্ম */}
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
           <h3 className="text-xl font-bold text-white mb-4">Add New Product</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Product Name</label>
               <input 
                 type="text" 
                 placeholder="Product Name" 
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500" 
               />
             </div>
             <div>
@@ -101,26 +93,48 @@ export default function AdminDashboardPage() {
               <input 
                 type="number" 
                 placeholder="Price" 
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500" 
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Category</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Category & Type</label>
               <select className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500">
-                <option>Select Category</option>
-                <option>Eyeglasses</option>
-                <option>Sunglasses</option>
-                <option>Contact Lenses</option>
+                <option value="">Select Category</option>
+
+                {/* ১. Frames */}
+                <optgroup label="1. Frames">
+                  <option value="frames-metal">Frames - Metal Frame</option>
+                  <option value="frames-shell">Frames - Shell Frame</option>
+                  <option value="frames-baby">Frames - Baby Frame</option>
+                </optgroup>
+
+                {/* ২. Sunglasses */}
+                <optgroup label="2. Sunglasses">
+                  <option value="sunglasses">Sunglasses</option>
+                </optgroup>
+
+                {/* ৩. Power Glasses */}
+                <optgroup label="3. Power Glasses">
+                  <option value="power-glasses">Power Glasses</option>
+                </optgroup>
+
+                {/* ৪. Contact Lenses */}
+                <optgroup label="4. Contact Lenses">
+                  <option value="contact-power">Contact Lenses - Power Contact Lens</option>
+                  <option value="contact-colorful">Contact Lenses - Colorful Lens</option>
+                  <option value="contact-cosmetic">Contact Lenses - Cosmetic Lens</option>
+                </optgroup>
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Product Image</label>
               <input 
                 type="file" 
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-300 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-300 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" 
               />
             </div>
           </div>
