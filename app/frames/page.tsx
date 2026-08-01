@@ -1,156 +1,155 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/supabaseClient";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  sub_category?: string;
-  image_url: string;
-}
+import { useState } from 'react';
+import Link from 'next/link';
 
 export default function FramesPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [selectedSubCategory, setSelectedSubCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [frameType, setFrameType] = useState('Metal Frame');
+  const [gender, setGender] = useState('Gents');
 
-  // ফ্রেমের সাব-ক্যাটাগরি লিস্ট
-  const subCategories = [
-    "All",
-    "Metal Full Frame",
-    "Metal Half Frame",
-    "Cell Frame",
-    "Rimless",
-    "Baby Frame"
-  ];
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '8801779666030';
 
-  // Supabase থেকে শুধুমাত্র 'Frames' ক্যাটাগরির প্রোডাক্টগুলো আনা
-  const fetchFrames = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("category", "Frames")
-      .order("created_at", { ascending: false });
-
-    if (!error && data) {
-      setProducts(data);
-    }
-    setLoading(false);
+  const handleViewFrames = () => {
+    const message = `হ্যালো Eye Point Optics! 👋\nআমি চশমার ফ্রেম দেখতে চাই:\n\n📌 *Frame Type:* ${frameType}\n👤 *Gender:* ${gender}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
-  useEffect(() => {
-    fetchFrames();
-  }, []);
-
-  // সাব-ক্যাটাগরি এবং সার্চ দিয়ে ফিল্টার করা
-  const filteredFrames = products.filter((item) => {
-    const matchesSubCategory =
-      selectedSubCategory === "All" || item.sub_category === selectedSubCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSubCategory && matchesSearch;
-  });
-
   return (
-    <main className="bg-slate-950 text-white min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="min-h-screen bg-slate-950 text-slate-900 flex items-center justify-center p-3 md:p-6 font-sans">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 space-y-5 relative border border-slate-200">
         
-        {/* Header Section */}
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="inline-flex rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm text-blue-300">
-            👓 Exclusive Collection
-          </span>
-          <h1 className="mt-6 text-4xl md:text-5xl font-black">
-            Premium Frames
-          </h1>
-          <p className="mt-4 text-slate-400">
-            Discover lightweight, durable, and stylish frames designed for your everyday comfort.
+        {/* Header */}
+        <div className="flex items-center justify-between border-b pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl text-xl">
+              👓
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800">Frames</h1>
+              <p className="text-xs text-slate-500">Choose Your Style</p>
+            </div>
+          </div>
+          <Link
+            href="/"
+            className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200 transition"
+          >
+            ✕
+          </Link>
+        </div>
+
+        {/* 1. Select Frame Type */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Select Frame Type
+          </label>
+          <div className="space-y-2">
+            {[
+              { id: 'Metal Frame', label: 'Metal Frame', icon: '👓' },
+              { id: 'Shell Frame', label: 'Shell Frame', icon: '🕶️' },
+              { id: 'Rimless Frame', label: 'Rimless Frame', icon: '🥽' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setFrameType(item.id)}
+                className={`w-full p-3 rounded-2xl border flex items-center justify-between transition ${
+                  frameType === item.id
+                    ? 'border-blue-600 bg-blue-50/40 text-blue-900 ring-1 ring-blue-600 font-bold'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 font-medium'
+                }`}
+              >
+                <div className="flex items-center gap-3 text-sm">
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
+                </div>
+                {frameType === item.id && (
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
+                    ✓
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Select Gender */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Select Gender
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { id: 'Gents', label: 'Gents', sub: '(Jeans)', icon: '👨' },
+              { id: 'Ladies', label: 'Ladies', sub: '', icon: '👩' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setGender(item.id)}
+                className={`p-3 rounded-2xl border flex items-center gap-3 transition ${
+                  gender === item.id
+                    ? 'border-blue-600 bg-blue-50/40 text-blue-900 ring-1 ring-blue-600 font-bold'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 font-medium'
+                }`}
+              >
+                <span className="text-xl">{item.icon}</span>
+                <div className="text-left">
+                  <div className="text-xs">{item.label}</div>
+                  {item.sub && <div className="text-[10px] text-slate-400 font-normal">{item.sub}</div>}
+                </div>
+                {gender === item.id && (
+                  <div className="ml-auto w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                    ✓
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Action Button */}
+        <div>
+          <button
+            type="button"
+            onClick={handleViewFrames}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/30 text-sm"
+          >
+            <span>View Frames</span>
+            <span>➔</span>
+          </button>
+          <p className="text-[11px] text-slate-400 text-center mt-2">
+            🔒 আমাদের সব ফ্রেম দেখুন
           </p>
         </div>
 
-        {/* Filter Tabs (সাব-ক্যাটাগরি বাটনগুলো) */}
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          {subCategories.map((subCat) => (
-            <button
-              key={subCat}
-              onClick={() => setSelectedSubCategory(subCat)}
-              className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 border ${
-                selectedSubCategory === subCat
-                  ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/30"
-                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
-              }`}
-            >
-              {subCat}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Bar */}
-        <div className="mt-8 flex justify-center">
-          <input
-            type="text"
-            placeholder="Search frames by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md rounded-xl bg-slate-900 border border-slate-800 px-6 py-4 text-white focus:outline-none focus:border-blue-500 transition"
-          />
-        </div>
-
-        {/* Loading State */}
-        {loading && (
-          <p className="text-center text-slate-400 mt-16 text-lg">Loading frames...</p>
-        )}
-
-        {/* Product Grid */}
-        {!loading && (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-16">
-            {filteredFrames.map((frame) => (
-              <div key={frame.id} className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
-                <div>
-                  <div className="relative h-72 bg-slate-900 flex items-center justify-center overflow-hidden">
-                    {frame.image_url ? (
-                      <img
-                        src={frame.image_url}
-                        alt={frame.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-7xl">👓</span>
-                    )}
-                    <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase">
-                      {frame.sub_category || "Frame"}
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-2xl font-bold">{frame.name}</h3>
-                    <p className="text-blue-400 font-black text-xl mt-4">৳ {frame.price}</p>
-                  </div>
-                </div>
-                <div className="p-6 pt-0 flex gap-4">
-                  <a
-                    href={`https://wa.me/8801XXXXXXXXX?text=I want to order this frame: ${frame.name} (Price: ৳${frame.price})`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition"
-                  >
-                    Order on WhatsApp
-                  </a>
-                </div>
-              </div>
-            ))}
+        {/* 3. Popular Frames */}
+        <div className="pt-2 border-t">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Popular Frames</h3>
+            <span className="text-[11px] text-blue-600 font-bold cursor-pointer">View All</span>
           </div>
-        )}
+          
+          <div className="grid grid-cols-2 gap-3">
+            {/* Item 1 */}
+            <div className="border border-slate-200 rounded-2xl p-2.5 bg-slate-50 relative">
+              <span className="absolute top-2 right-2 text-slate-300 text-xs cursor-pointer">🤍</span>
+              <div className="h-20 bg-white rounded-xl mb-2 flex items-center justify-center text-3xl">👓</div>
+              <h4 className="text-xs font-bold text-slate-800">Metal Frame</h4>
+              <p className="text-xs font-black text-slate-900 mt-0.5">৳1,650</p>
+            </div>
 
-        {/* No Products Found */}
-        {!loading && filteredFrames.length === 0 && (
-          <p className="text-center text-slate-500 mt-16 text-lg">No frames found in this category.</p>
-        )}
+            {/* Item 2 */}
+            <div className="border border-slate-200 rounded-2xl p-2.5 bg-slate-50 relative">
+              <span className="absolute top-2 right-2 text-slate-300 text-xs cursor-pointer">🤍</span>
+              <div className="h-20 bg-white rounded-xl mb-2 flex items-center justify-center text-3xl">🕶️</div>
+              <h4 className="text-xs font-bold text-slate-800">Shell Frame</h4>
+              <p className="text-xs font-black text-slate-900 mt-0.5">৳1,850</p>
+            </div>
+          </div>
+        </div>
 
       </div>
-    </main>
+    </div>
   );
 }

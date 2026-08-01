@@ -30,7 +30,6 @@ interface ProductForm {
 export default function AddProductPage() {
   const router = useRouter();
 
-  // Part 1: Auth + State
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -38,7 +37,7 @@ export default function AddProductPage() {
   const [form, setForm] = useState<ProductForm>({
     name: '',
     price: '',
-    category: 'Frames', // Default
+    category: 'Frames',
     sub_category: '',
     target_group: 'Unisex',
     frame_type: 'Metal Frame',
@@ -69,7 +68,6 @@ export default function AddProductPage() {
     checkAuth();
   }, [router]);
 
-  // Input Handler
   const handleInput = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -77,22 +75,18 @@ export default function AddProductPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Image Handler
   const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     setForm((prev) => ({ ...prev, image: e.target.files![0] }));
   };
 
-  // Featured Checkbox Handler
   const handleFeatured = (e: ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, featured: e.target.checked }));
   };
 
-  // Part 3 & 4: Image Upload + Save to Database
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Part 5: Validation
     if (!form.name.trim() || !form.price || !form.category) {
       alert('⚠️ Product Name, Price এবং Category অবশ্যই পূরণ করতে হবে।');
       return;
@@ -122,24 +116,21 @@ export default function AddProductPage() {
         imageUrl = publicUrlData.publicUrl;
       }
 
-      // Save Data to Supabase Table
+      // Save Data to Supabase Table (Fixed column mapping)
       const { error: insertError } = await supabase.from('products').insert([
         {
-          title: form.name, // Schema Title / Name compatibility
           name: form.name,
           price: parseFloat(form.price),
           category: form.category,
           sub_category: form.sub_category,
           target_group: form.target_group,
-          // Smart conditional data saving
           frame_type: ['Frames', 'Baby Frames', 'Sunglasses'].includes(form.category) ? form.frame_type : 'None',
           lens_type: ['Power Glasses', 'Contact Lenses'].includes(form.category) ? form.lens_type : 'None',
           lens_quality: form.category === 'Power Glasses' ? form.lens_quality : 'None',
           lens_color: form.category === 'Contact Lenses' ? form.lens_color : 'None',
           description: form.description,
           stock_status: form.stock_status,
-          is_featured: form.featured,
-          featured: form.featured,
+          featured: form.featured, // 🔥 Corrected here!
           image_url: imageUrl,
         },
       ]);
@@ -187,8 +178,6 @@ export default function AddProductPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans">
-      
-      {/* Header - Matching Branding */}
       <header className="border-b border-slate-800 bg-slate-900 sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -207,7 +196,6 @@ export default function AddProductPage() {
         </div>
       </header>
 
-      {/* Main Form Container */}
       <main className="max-w-4xl mx-auto p-4 md:p-8">
         <form
           onSubmit={handleSubmit}
@@ -217,14 +205,10 @@ export default function AddProductPage() {
             <h2 className="text-2xl font-bold text-blue-400 flex items-center gap-2">
               📝 Add New Product
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              ক্যাটাগরি সিলেক্ট করলে প্রয়োজনীয় ডায়নামিক ফিল্ডগুলো অটোমেটিক চলে আসবে।
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* 📝 Product Name */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Product Name *
@@ -235,12 +219,11 @@ export default function AddProductPage() {
                 required
                 value={form.name}
                 onChange={handleInput}
-                placeholder="যেমন: Classic Metal Frame / Ray-Ban Oval"
+                placeholder="যেমন: Classic Metal Frame"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500 transition"
               />
             </div>
 
-            {/* 💰 Price */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Price (৳) *
@@ -256,10 +239,9 @@ export default function AddProductPage() {
               />
             </div>
 
-            {/* 📂 Category */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2">
-                Category * (Smart Trigger)
+                Category *
               </label>
               <select
                 name="category"
@@ -275,7 +257,6 @@ export default function AddProductPage() {
               </select>
             </div>
 
-            {/* 📁 Sub Category */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Sub Category
@@ -285,12 +266,11 @@ export default function AddProductPage() {
                 name="sub_category"
                 value={form.sub_category}
                 onChange={handleInput}
-                placeholder="যেমন: Premium / Casual / Prescription"
+                placeholder="যেমন: Premium / Casual"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500 transition"
               />
             </div>
 
-            {/* 👤 Target Group */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Target Group
@@ -309,9 +289,8 @@ export default function AddProductPage() {
               </select>
             </div>
 
-            {/* 🕶 Frame Type (Only for Frames, Baby Frames, Sunglasses) */}
             {['Frames', 'Baby Frames', 'Sunglasses'].includes(form.category) && (
-              <div className="animate-fadeIn">
+              <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-2">
                   🕶 Frame Type
                 </label>
@@ -328,9 +307,8 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* 👁 Lens Type (For Power Glasses & Contact Lenses) */}
             {['Power Glasses', 'Contact Lenses'].includes(form.category) && (
-              <div className="animate-fadeIn">
+              <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-cyan-400 mb-2">
                   👁 Lens Type
                 </label>
@@ -358,9 +336,8 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* ⭐ Lens Quality (ONLY for Power Glasses) */}
             {form.category === 'Power Glasses' && (
-              <div className="animate-fadeIn">
+              <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-amber-400 mb-2">
                   ⭐ Select Lens Quality
                 </label>
@@ -381,11 +358,10 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* 🎨 Lens Color (ONLY for Contact Lenses - Matching UI Swatches) */}
             {form.category === 'Contact Lenses' && (
-              <div className="animate-fadeIn">
+              <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-pink-400 mb-2">
-                  🎨 Lens Color (Contact Lens)
+                  🎨 Lens Color
                 </label>
                 <select
                   name="lens_color"
@@ -409,7 +385,6 @@ export default function AddProductPage() {
               </div>
             )}
 
-            {/* 📦 Stock Status */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                 Stock Status
@@ -427,7 +402,6 @@ export default function AddProductPage() {
 
           </div>
 
-          {/* 📄 Description */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Description
@@ -442,10 +416,9 @@ export default function AddProductPage() {
             />
           </div>
 
-          {/* 🖼 Image Upload */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              Product Image Upload (Supabase Storage)
+              Product Image Upload
             </label>
             <input
               type="file"
@@ -455,7 +428,6 @@ export default function AddProductPage() {
             />
           </div>
 
-          {/* 🌟 Featured Product Checkbox */}
           <div className="flex items-center space-x-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
             <input
               type="checkbox"
@@ -465,11 +437,10 @@ export default function AddProductPage() {
               className="w-5 h-5 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500"
             />
             <label htmlFor="featured" className="text-sm font-medium text-slate-300 cursor-pointer">
-              🌟 Home Page - Our Popular Products (হোম পেজের পপুলার সেকশনে দেখাবে)
+              🌟 Popular Product (হোম পেজে দেখাবে)
             </label>
           </div>
 
-          {/* 💾 Save Button */}
           <div className="pt-2">
             <button
               type="submit"

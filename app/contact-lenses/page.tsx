@@ -1,229 +1,174 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useState } from 'react';
+import Link from 'next/link';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "YOUR_SUPABASE_URL";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "YOUR_SUPABASE_ANON_KEY";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-const colorHexMap: { [key: string]: string } = {
-  Ash: "#94a3b8",
-  Mint: "#6ee7b7",
-  Grey: "#64748b",
-  Green: "#22c55e",
-  Brown: "#b45309",
-  Blue: "#3b82f6",
-  Aqua: "#06b6d4",
-  Honey: "#eab308",
-  Hazel: "#9a3412",
-  Emerald: "#059669",
-  Violet: "#8b5cf6",
-};
+// স্ক্রিনশট অনুযায়ী কালার সুইচ লিস্ট ও ব্যাকগ্রাউন্ড কালার
+const COLORS = [
+  { name: 'Natural Black', bg: 'bg-black' },
+  { name: 'Chocolate Brown', bg: 'bg-[#4a2e18]' },
+  { name: 'Brown', bg: 'bg-[#784212]' },
+  { name: 'Light Brown', bg: 'bg-[#b9770e]' },
+  { name: 'Honey Brown', bg: 'bg-[#d68910]' },
+  { name: 'Hazel', bg: 'bg-[#827717]' },
+  { name: 'Olive Green', bg: 'bg-[#33691e]' },
+  { name: 'Gray', bg: 'bg-[#616161]' },
+  { name: 'Light Gray', bg: 'bg-[#9e9e9e]' },
+  { name: 'Aqua Blue', bg: 'bg-[#00b0ff]' },
+  { name: 'Ocean Blue', bg: 'bg-[#0077c2]' },
+  { name: 'Ice Gray', bg: 'bg-[#b0bec5]' },
+];
 
 export default function ContactLensesPage() {
-  const [lensesData, setLensesData] = useState<any[]>([]);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState('Cosmetic Lens');
+  const [selectedColor, setSelectedColor] = useState('Natural Black');
+  const [power, setPower] = useState('-2.50');
+  const [quantity, setQuantity] = useState(1);
 
-  useEffect(() => {
-    async function fetchLenses() {
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category", "Contact Lenses");
-
-        if (error) {
-          console.error("Error fetching lenses:", error);
-        } else if (data) {
-          setLensesData(data);
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchLenses();
-  }, []);
-
-  const filtered = lensesData.filter((item) => {
-    const matchesCategory =
-      activeCategory === "All" || item.sub_category === activeCategory;
-    const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
+  // পাওয়ার অপশন জেনারেট (-0.25 থেকে -10.00 পর্যন্ত)
+  const powerOptions = Array.from({ length: 40 }, (_, i) => {
+    const val = (-0.25 * (i + 1)).toFixed(2);
+    return val;
   });
 
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '8801779666030';
+
+  // WhatsApp Order Link Generator
+  const handleOrder = () => {
+    const message = `হ্যালো Eye Point Optics! 👋\nআমি কন্টাক্ট লেন্স অর্ডার করতে চাই:\n\n👁 *টাইপ:* ${selectedType}\n🎨 *কালার:* ${selectedColor}\n🔢 *পাওয়ার (SPH):* ${power}\n📦 *পরিমাণ:* ${quantity} Pair (জোড়া)\n\n💳 বিকাশ পেমেন্ট নম্বর: 01907440365`;
+    
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
-    <main className="bg-slate-950 text-white min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="inline-flex rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm text-blue-300">
-            👁️ Soft & Comfortable
-          </span>
-          <h1 className="mt-6 text-4xl md:text-5xl font-black">Contact Lenses</h1>
-          <p className="mt-4 text-slate-400">
-            Choose from our premium collection of cosmetic and power contact lenses.
-          </p>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-3 md:p-6 font-sans">
+      <div className="w-full max-w-md bg-white text-slate-900 rounded-3xl shadow-2xl p-5 space-y-6 relative border border-slate-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between border-b pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl text-xl">
+              👁️
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800">Contact Lenses</h1>
+              <p className="text-xs text-slate-500">Select Type & Details</p>
+            </div>
+          </div>
+          <Link
+            href="/"
+            className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200 transition"
+          >
+            ✕
+          </Link>
         </div>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          {["All", "Cosmetic Lens", "Colourful Power Lens", "Transparent Power Lens"].map((cat) => (
+        {/* 1. Type Tabs */}
+        <div className="grid grid-cols-3 gap-2">
+          {['Cosmetic Lens', 'Power (Transparent)', 'Color Power Lens'].map((type) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold transition ${
-                activeCategory === cat
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-blue-500/50"
+              key={type}
+              onClick={() => setSelectedType(type)}
+              className={`py-2 px-2 text-[11px] font-semibold rounded-xl border transition text-center ${
+                selectedType === type
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
             >
-              {cat}
+              {type}
             </button>
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <input
-            type="text"
-            placeholder="Search contact lenses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md rounded-xl bg-slate-900 border border-slate-800 px-6 py-4 text-white focus:outline-none focus:border-blue-500 transition"
-          />
-        </div>
-
-        {loading ? (
-          <div className="text-center mt-16 text-slate-400">Loading contact lenses...</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center mt-16 text-slate-400">No contact lenses found in this category.</div>
-        ) : (
-          <div className="grid md:grid-cols-3 gap-8 mt-16">
-            {filtered.map((item) => (
-              <ProductCard key={item.id} item={item} />
+        {/* 2. Select Color */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+            Select Color
+          </label>
+          <div className="grid grid-cols-4 gap-3 max-h-56 overflow-y-auto pr-1">
+            {COLORS.map((color) => (
+              <button
+                key={color.name}
+                onClick={() => setSelectedColor(color.name)}
+                className={`p-2.5 rounded-2xl flex flex-col items-center gap-1.5 border transition ${
+                  selectedColor === color.name
+                    ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-500/20'
+                    : 'border-slate-100 bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <div className={`w-7 h-7 rounded-full shadow-inner ${color.bg} border border-white`} />
+                <span className="text-[10px] font-semibold text-slate-700 text-center line-clamp-1">
+                  {color.name}
+                </span>
+              </button>
             ))}
           </div>
-        )}
-      </div>
-    </main>
-  );
-}
-
-function ProductCard({ item }: { item: any }) {
-  const [power, setPower] = useState("0.00");
-  const [color, setColor] = useState("Ash");
-
-  const isCosmetic = item.sub_category === "Cosmetic Lens";
-  const isTransparent = item.sub_category === "Transparent Power Lens";
-
-  let whatsappMessage = `I want to order ${item.sub_category || "Contact Lens"}: ${item.name} (৳${item.price})`;
-  
-  if (!isTransparent) {
-    whatsappMessage += ` | Color: ${color}`;
-  }
-  if (!isCosmetic) {
-    whatsappMessage += ` | Power: ${power}`;
-  }
-  whatsappMessage += ` | Payment Method: Bkash Payment (01907440365)`;
-
-  const availableColors = ["Ash", "Mint", "Grey", "Green", "Brown", "Blue", "Aqua", "Honey", "Hazel", "Emerald", "Violet"];
-
-  return (
-    <div className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
-      <div>
-        <div className="relative h-64 bg-slate-800 flex items-center justify-center">
-          {item.image_url ? (
-            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-6xl">👁️</span>
-          )}
-          <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-            {item.sub_category || "Lens"}
-          </span>
         </div>
-        <div className="p-6">
-          <h3 className="text-xl font-bold">{item.name}</h3>
-          <p className="text-slate-400 mt-2 text-sm">{item.description || "High quality lens"}</p>
-          <p className="text-blue-400 font-black text-lg mt-4">৳{item.price}</p>
 
-          {!isTransparent && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-400">Select Color:</label>
-                <div className="flex items-center gap-1.5 text-xs text-blue-300 font-medium">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full border border-slate-600 inline-block shadow-sm"
-                    style={{ backgroundColor: colorHexMap[color] || "#fff" }}
-                  ></span>
-                  {color}
-                </div>
-              </div>
-              <select
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-              >
-                {availableColors.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+        {/* 3. Power (SPH) Dropdown */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Power (SPH)
+          </label>
+          <select
+            value={power}
+            onChange={(e) => setPower(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="0.00">0.00 (Plano / Powerless)</option>
+            {powerOptions.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {!isCosmetic && (
-            <div className="mt-4">
-              <label className="block text-xs font-semibold text-slate-400 mb-1">Select Power (SPH):</label>
-              <select
-                value={power}
-                onChange={(e) => setPower(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-              >
-                <option value="0.00">0.00 (Plain)</option>
-                <option value="-0.50">-0.50</option>
-                <option value="-1.00">-1.00</option>
-                <option value="-1.50">-1.50</option>
-                <option value="-2.00">-2.00</option>
-                <option value="-2.50">-2.50</option>
-                <option value="-3.00">-3.00</option>
-                <option value="-3.50">-3.50</option>
-                <option value="-4.00">-4.00</option>
-                <option value="-4.50">-4.50</option>
-                <option value="-5.00">-5.00</option>
-                <option value="-5.50">-5.50</option>
-                <option value="-6.00">-6.00</option>
-                <option value="-6.50">-6.50</option>
-                <option value="-7.00">-7.00</option>
-                <option value="-7.50">-7.50</option>
-                <option value="-8.00">-8.00</option>
-                <option value="-8.50">-8.50</option>
-                <option value="-9.00">-9.00</option>
-                <option value="-9.50">-9.50</option>
-                <option value="-10.00">-10.00</option>
-              </select>
-            </div>
-          )}
-
-          <div className="mt-4 p-3 bg-slate-950/60 border border-slate-800 rounded-xl">
-            <p className="text-xs text-slate-400 font-medium">💳 বিকাশ পেমেন্ট নম্বর:</p>
-            <p className="text-sm font-bold text-blue-400 mt-0.5">01907440365</p>
+        {/* 4. Quantity (Pair) Counter */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Quantity (Pair)
+          </label>
+          <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl p-1.5">
+            <button
+              type="button"
+              onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+              className="w-10 h-10 bg-white rounded-lg border border-slate-200 flex items-center justify-center font-bold text-slate-700 hover:bg-slate-100 transition shadow-sm"
+            >
+              -
+            </button>
+            <span className="font-bold text-slate-800 text-base">{quantity}</span>
+            <button
+              type="button"
+              onClick={() => setQuantity((prev) => prev + 1)}
+              className="w-10 h-10 bg-white rounded-lg border border-slate-200 flex items-center justify-center font-bold text-slate-700 hover:bg-slate-100 transition shadow-sm"
+            >
+              +
+            </button>
           </div>
         </div>
-      </div>
 
-      <div className="p-6 pt-0">
-        <a
-          href={`https://wa.me/8801XXXXXXXXX?text=${encodeURIComponent(whatsappMessage)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full block text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition shadow-lg shadow-blue-600/20"
-        >
-          Order on WhatsApp
-        </a>
+        {/* Payment Info */}
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+          <span className="text-slate-600 font-medium">💳 বিকাশ পেমেন্ট নম্বর:</span>
+          <span className="font-bold text-blue-600">01907440365</span>
+        </div>
+
+        {/* 5. Order Button */}
+        <div className="space-y-2 pt-1">
+          <button
+            type="button"
+            onClick={handleOrder}
+            className="w-full bg-[#00A884] hover:bg-[#008f70] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/20"
+          >
+            💬 Order on WhatsApp
+          </button>
+          <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
+            🔒 আপনার তথ্য নিরাপদ ও গোপন থাকবে
+          </p>
+        </div>
+
       </div>
     </div>
   );
