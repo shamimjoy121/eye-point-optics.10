@@ -1,106 +1,151 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "YOUR_SUPABASE_URL";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "YOUR_SUPABASE_ANON_KEY";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { useState } from 'react';
+import Link from 'next/link';
 
 export default function SunglassesPage() {
-  const [sunglassesData, setSunglassesData] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [sunglassType, setSunglassType] = useState('Polarized');
+  const [gender, setGender] = useState('Unisex');
 
-  // সুপাবেজ থেকে Sunglasses ক্যাটাগরির ডেটা ফেচ করা
-  useEffect(() => {
-    async function fetchSunglasses() {
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category", "Sunglasses");
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '8801779666030';
 
-        if (error) {
-          console.error("Error fetching sunglasses:", error);
-        } else if (data) {
-          setSunglassesData(data);
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchSunglasses();
-  }, []);
-
-  const filtered = sunglassesData.filter((item) =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleViewSunglasses = () => {
+    const message = `হ্যালো Eye Point Optics! 👋\nআমি সানগ্লাস কালেকশন দেখতে চাই:\n\n🕶️ *ফিচার/টাইপ:* ${sunglassType}\n👤 *জেন্ডার:* ${gender}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
-    <main className="bg-slate-950 text-white min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="inline-flex rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm text-blue-300">
-            🕶️ UV400 Protection
-          </span>
-          <h1 className="mt-6 text-4xl md:text-5xl font-black">Sunglasses Collection</h1>
-          <p className="mt-4 text-slate-400">Protect your eyes in style with our premium polarized sunglasses.</p>
+    <div className="min-h-screen bg-slate-950 text-slate-900 flex items-center justify-center p-3 md:p-6 font-sans">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 space-y-5 relative border border-slate-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between border-b pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-50 text-amber-600 rounded-xl text-xl">
+              🕶️
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800">Sunglasses</h1>
+              <p className="text-xs text-slate-500">UV Protection & Fashion</p>
+            </div>
+          </div>
+          <Link
+            href="/"
+            className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200 transition"
+          >
+            ✕
+          </Link>
         </div>
 
-        <div className="mt-12 flex justify-center">
-          <input
-            type="text"
-            placeholder="Search sunglasses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md rounded-xl bg-slate-900 border border-slate-800 px-6 py-4 text-white focus:outline-none focus:border-blue-500 transition"
-          />
-        </div>
-
-        {loading ? (
-          <div className="text-center mt-16 text-slate-400">Loading sunglasses...</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center mt-16 text-slate-400">No sunglasses found in database.</div>
-        ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 mt-16">
-            {filtered.map((item) => (
-              <div key={item.id} className="rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col justify-between hover:border-blue-500/50 transition">
-                <div>
-                  <div className="relative h-64 bg-slate-800 flex items-center justify-center">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-6xl">🕶️</span>
-                    )}
-                    <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                      {item.sub_category || "Sunglasses"}
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold">{item.name}</h3>
-                    <p className="text-slate-400 mt-2 text-sm">{item.description || item.sub_category || "UV400 Protection"}</p>
-                    <p className="text-blue-400 font-black text-lg mt-4">৳{item.price}</p>
+        {/* 1. Select Sunglass Type */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Select Feature Type
+          </label>
+          <div className="space-y-2">
+            {[
+              { id: 'Polarized Lenses', label: 'Polarized Lenses', desc: 'অতিরিক্ত আলো ও রিফ্লেকশন রোধী', icon: '🕶️' },
+              { id: 'UV400 Protection', label: 'UV400 Protection', desc: '১০০% ক্ষতিকর রোদ থেকে সুরক্ষার জন্য', icon: '☀️' },
+              { id: 'Gradient / Fashion', label: 'Gradient / Fashion', desc: 'স্টাইলিশ শেড ও ট্রেন্ডি লুক', icon: '✨' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setSunglassType(item.id)}
+                className={`w-full p-3 rounded-2xl border flex items-center justify-between transition ${
+                  sunglassType === item.id
+                    ? 'border-amber-500 bg-amber-50/40 text-amber-900 ring-1 ring-amber-500 font-bold'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 font-medium'
+                }`}
+              >
+                <div className="flex items-center gap-3 text-sm">
+                  <span>{item.icon}</span>
+                  <div className="text-left">
+                    <div className="text-xs font-bold">{item.label}</div>
+                    <div className="text-[10px] text-slate-400 font-normal">{item.desc}</div>
                   </div>
                 </div>
-                <div className="p-6 pt-0">
-                  <a
-                    href={`https://wa.me/8801XXXXXXXXX?text=${encodeURIComponent(`I want to order Sunglasses: ${item.name} (৳${item.price})`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full block text-center rounded-xl bg-blue-600 py-3 font-bold hover:bg-blue-500 transition"
-                  >
-                    Order on WhatsApp
-                  </a>
-                </div>
-              </div>
+                {sunglassType === item.id && (
+                  <div className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs">
+                    ✓
+                  </div>
+                )}
+              </button>
             ))}
           </div>
-        )}
+        </div>
+
+        {/* 2. Select Gender */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Select Gender
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: 'Gents', label: 'Gents', icon: '👨' },
+              { id: 'Ladies', label: 'Ladies', icon: '👩' },
+              { id: 'Unisex', label: 'Unisex', icon: '👥' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setGender(item.id)}
+                className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1 transition ${
+                  gender === item.id
+                    ? 'border-amber-500 bg-amber-50/40 text-amber-900 ring-1 ring-amber-500 font-bold'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 font-medium'
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span className="text-xs">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div>
+          <button
+            type="button"
+            onClick={handleViewSunglasses}
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 transition shadow-lg shadow-amber-500/25 text-sm"
+          >
+            <span>View Sunglasses</span>
+            <span>➔</span>
+          </button>
+          <p className="text-[11px] text-slate-400 text-center mt-2">
+            🕶️ আমাদের সব প্রিমিয়াম সানগ্লাস দেখুন
+          </p>
+        </div>
+
+        {/* 3. Popular Sunglasses */}
+        <div className="pt-2 border-t">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Popular Sunglasses</h3>
+            <span className="text-[11px] text-amber-600 font-bold cursor-pointer">View All</span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {/* Item 1 */}
+            <div className="border border-slate-200 rounded-2xl p-2.5 bg-slate-50 relative">
+              <span className="absolute top-2 right-2 text-slate-300 text-xs cursor-pointer">🤍</span>
+              <div className="h-20 bg-white rounded-xl mb-2 flex items-center justify-center text-3xl">🕶️</div>
+              <h4 className="text-xs font-bold text-slate-800">Aviator Polarized</h4>
+              <p className="text-xs font-black text-slate-900 mt-0.5">৳2,250</p>
+            </div>
+
+            {/* Item 2 */}
+            <div className="border border-slate-200 rounded-2xl p-2.5 bg-slate-50 relative">
+              <span className="absolute top-2 right-2 text-slate-300 text-xs cursor-pointer">🤍</span>
+              <div className="h-20 bg-white rounded-xl mb-2 flex items-center justify-center text-3xl">🕶️</div>
+              <h4 className="text-xs font-bold text-slate-800">Wayfarer UV400</h4>
+              <p className="text-xs font-black text-slate-900 mt-0.5">৳1,950</p>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </main>
+    </div>
   );
 }

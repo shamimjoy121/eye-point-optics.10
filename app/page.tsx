@@ -47,12 +47,12 @@ export default function HomePage() {
 
           {/* Header Action Buttons */}
           <div className="hidden sm:flex items-center gap-4">
-            <button
-              onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('হ্যালো! আমি আই টেস্ট বুক করতে চাই।')}`, '_blank')}
+            <Link
+              href="/eye-test"
               className="bg-amber-500/10 border border-amber-400/40 text-amber-300 hover:bg-amber-500 hover:text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition"
             >
               📅 Book Your Eye Test
-            </button>
+            </Link>
             <a
               href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
@@ -82,7 +82,7 @@ export default function HomePage() {
             👓 Baby Frames
           </Link>
 
-          <Link href="/frames" className="bg-gradient-to-r from-orange-600 to-amber-600 text-white font-semibold px-5 py-2 rounded-full text-xs shadow-md hover:brightness-110 flex items-center gap-2">
+          <Link href="/sunglasses" className="bg-gradient-to-r from-orange-600 to-amber-600 text-white font-semibold px-5 py-2 rounded-full text-xs shadow-md hover:brightness-110 flex items-center gap-2">
             ☀️ Sunglasses
           </Link>
 
@@ -111,7 +111,7 @@ export default function HomePage() {
               {[
                 { label: 'Frames', icon: '👓', href: '/frames' },
                 { label: 'Baby Frames', icon: '👓', href: '/baby-frames' },
-                { label: 'Sunglasses', icon: '🕶️', href: '/frames' },
+                { label: 'Sunglasses', icon: '🕶️', href: '/sunglasses' },
                 { label: 'Power Glasses', icon: '⚡', href: '/power-glasses' },
                 { label: 'Contact Lenses', icon: '👁️', href: '/contact-lenses' },
               ].map((item) => (
@@ -160,12 +160,12 @@ export default function HomePage() {
               <h3 className="text-sm font-bold text-amber-300">Book Your Eye Test</h3>
               <p className="text-[11px] text-slate-300">Clear Vision, Better Life</p>
               
-              <button
-                onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('হ্যালো! আমি আই টেস্ট বুক করতে চাই।')}`, '_blank')}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg transition"
+              <Link
+                href="/eye-test"
+                className="block w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg transition text-center"
               >
                 Book Now
-              </button>
+              </Link>
             </div>
 
             <div className="pt-4 space-y-1.5 text-left text-[11px] text-slate-300 border-t border-slate-800 mt-4">
