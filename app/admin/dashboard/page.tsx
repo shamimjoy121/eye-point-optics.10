@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/components/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Product {
   id: number;
