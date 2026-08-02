@@ -2,84 +2,83 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
-export default function AdminLogin() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setErrorMsg('');
 
-    try {
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    // Supabase Auth দিয়ে ইমেইল ও পাসওয়ার্ড চেক
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (loginError) throw loginError;
-
-      if (data.user) {
-        router.push('/admin');
-      }
-    } catch (err: any) {
-      setError('❌ ইমেইল বা পাসওয়ার্ড ভুল হয়েছে! আবার চেষ্টা করুন।');
-    } finally {
+    if (error) {
+      setErrorMsg('ইমেইল বা পাসওয়ার্ড ভুল হয়েছে!');
       setLoading(false);
+    } else {
+      // লগইন সফল হলে সরাসরি অ্যাডমিন ড্যাশবোর্ডে নিয়ে যাবে
+      router.push('/admin/dashboard');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-4">
-      <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="text-center mb-8">
-          <span className="text-4xl">🔒</span>
-          <h1 className="text-2xl font-bold text-white mt-3">অ্যাডমিন লগইন</h1>
-          <p className="text-xs text-slate-400 mt-1">EP OPTICS ম্যানেজমেন্ট প্যানেল</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Admin Login 🔐
+        </h2>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-950/40 border border-red-900 text-red-400 text-xs rounded-xl text-center">
-            {error}
+        {errorMsg && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm text-center">
+            {errorMsg}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">অ্যাডমিন ইমেইল</label>
-            <input 
-              type="email" 
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-white text-sm"
-              placeholder="admin@email.com"
-              required
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+              placeholder="admin@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">পাসওয়ার্ড</label>
-            <input 
-              type="password" 
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-white text-sm"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
               placeholder="••••••••"
-              required
             />
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg disabled:bg-slate-800 disabled:text-slate-600 text-sm"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200 disabled:opacity-50"
           >
-            {loading ? '⏳ যাচাই করা হচ্ছে...' : '🔑 লগইন করুন'}
+            {loading ? 'লগইন হচ্ছে...' : 'Login'}
           </button>
         </form>
       </div>
