@@ -142,7 +142,7 @@ export default function PowerGlassesPage() {
         {/* গাইডেন্স মেসেজ */}
         <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl mb-6 text-center">
           <p className="text-xs font-bold text-emerald-400">
-            💡 পাওয়ারের মান জানতে আপনার পাওয়ার প্রেসক্রিপশন কার্ড দেখুন অথবা ছবি আপলোড করুন
+            💡 আপনার পওয়ারের দাম জানতে নীচের পাওয়ারের প্রেস্ক্রিপশন ঘরটি টি পূরণ করুন অথবা আপনার ফোন থেকে ছবি অপলোড করে সেন্ড ওয়াটস্যাপ বাটনে ট্যাপ করুন।
           </p>
         </div>
 
