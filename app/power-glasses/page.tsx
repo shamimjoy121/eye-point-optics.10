@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 export default function PowerGlassesPage() {
-  const [powerType, setPowerType] = useState('Single Vision');
-  const [lensQuality, setLensQuality] = useState('Blue Cut Glass');
+  const [selectedType, setSelectedType] = useState('Single Vision');
+  const [lensQuality, setLensQuality] = useState('White');
+  const [fileName, setFileName] = useState<string | null>(null);
 
   // Right Eye (OD)
   const [rightSph, setRightSph] = useState('-2.50');
@@ -14,240 +15,204 @@ export default function PowerGlassesPage() {
   const [rightAdd, setRightAdd] = useState('+1.00');
 
   // Left Eye (OS)
-  const [leftSph, setLeftSph] = useState('-2.25');
+  const [leftSph, setLeftSph] = useState('-2.00');
   const [leftCyl, setLeftCyl] = useState('-0.50');
   const [leftAxis, setLeftAxis] = useState('175');
   const [leftAdd, setLeftAdd] = useState('+1.00');
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '8801907440365';
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFileName(e.target.files[0].name);
+    }
+  };
 
-  const handleOrder = () => {
-    const message = `হ্যালো Eye Point Optics! 👋\nআমি পাওয়ার গ্লাস সম্পর্কিত দাম জানতে/অর্ডার করতে চাই:\n\n📌 *Power Type:* ${powerType}\n✨ *Lens Quality:* ${lensQuality}\n\n👁️ *Right Eye (OD):* SPH: ${rightSph}, CYL: ${rightCyl}, AXIS: ${rightAxis}, ADD: ${rightAdd}\n👁️ *Left Eye (OS):* SPH: ${leftSph}, CYL: ${leftCyl}, AXIS: ${leftAxis}, ADD: ${leftAdd}\n\n💳 বিকাশ পেমেন্ট নম্বর: 01779666030`;
+  // ১০০% ক্লিয়ার ও সেফ হোয়াটসঅ্যাপ লিংক জেনারেটর
+  const handleSubmitToWhatsApp = () => {
+    const phoneNumber = '8801779666030';
+    
+    // লাইন ব্রেক এবং স্টাইলিং এনকোড করে সাজানো
+    const text = 
+      `*EYE POINT OPTICS*%0A` +
+      `*POWER GLASS ORDER*%0A` +
+      `----------------------------------%0A` +
+      `Type: ${selectedType}%0A` +
+      `Quality: ${lensQuality}%0A%0A` +
+      `*RIGHT EYE (OD)*%0A` +
+      `SPH: ${rightSph} | CYL: ${rightCyl}%0A` +
+      `AXIS: ${rightAxis} | ADD: ${rightAdd}%0A%0A` +
+      `*LEFT EYE (OS)*%0A` +
+      `SPH: ${leftSph} | CYL: ${leftCyl}%0A` +
+      `AXIS: ${leftAxis} | ADD: ${leftAdd}%0A%0A` +
+      `Prescription File: ${fileName ? fileName : 'Not Uploaded'}%0A` +
+      `----------------------------------%0A` +
+      `Hello, I would like to confirm my order!`;
 
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${text}`;
+
     window.open(whatsappUrl, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-900 flex items-center justify-center p-3 md:p-6 font-sans">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 space-y-5 relative border border-slate-200">
+    <div className="min-h-screen bg-slate-950/80 p-4 flex items-center justify-center">
+      {/* মেইন কার্ড Container */}
+      <div className="relative w-full max-w-2xl bg-slate-900/90 border border-cyan-500/40 rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(6,182,212,0.25)] backdrop-blur-2xl">
         
-        {/* Header */}
-        <div className="flex items-center justify-between border-b pb-3">
+        {/* হেডার ও ক্লোজ বাটন */}
+        <div className="flex items-center justify-between border-b border-cyan-500/20 pb-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl text-xl">
+            <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/30 text-2xl text-cyan-400">
               👓
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">Power Glasses</h1>
-              <p className="text-xs text-slate-500">Build Your Prescription</p>
+              <h2 className="text-2xl font-black text-white tracking-wide">Power Glasses</h2>
+              <p className="text-cyan-400 text-xs font-semibold">Build Your Prescription</p>
             </div>
           </div>
-          <Link
-            href="/"
-            className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200 transition"
-          >
+          <Link href="/" className="text-slate-400 hover:text-red-400 transition text-2xl font-bold">
             ✕
           </Link>
         </div>
 
-        {/* 1. Stepper Indicator */}
-        <div className="flex items-center justify-between text-center px-2 py-1">
+        {/* স্টেপ প্রোগ্রেস বার */}
+        <div className="grid grid-cols-4 gap-2 mb-8 text-center">
           {[
-            { step: '1', label: 'Type', active: true },
-            { step: '2', label: 'Quality', active: true },
-            { step: '3', label: 'Prescription', active: true },
-            { step: '4', label: 'Send', active: false },
-          ].map((item, idx) => (
-            <div key={item.step} className="flex items-center gap-1">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    item.active ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}
-                >
-                  {item.step}
-                </div>
-                <span className="text-[10px] text-slate-500 mt-1">{item.label}</span>
+            { num: '1', label: 'Type' },
+            { num: '2', label: 'Quality' },
+            { num: '3', label: 'Prescription' },
+            { num: '4', label: 'Send' },
+          ].map((step, idx) => (
+            <div key={idx} className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm mb-1 ${
+                idx === 0 
+                  ? 'bg-emerald-500 text-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.8)]' 
+                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+              }`}>
+                {step.num}
               </div>
-              {idx < 3 && <div className="w-8 h-[2px] bg-slate-200 -mt-3" />}
+              <span className={`text-xs font-semibold ${idx === 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                {step.label}
+              </span>
             </div>
           ))}
         </div>
 
-        {/* 2. Select Power Type */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+        {/* সেকশন ১: SELECT POWER TYPE */}
+        <div className="mb-6">
+          <label className="text-xs font-bold text-cyan-300 uppercase tracking-widest block mb-3">
             Select Power Type
           </label>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              'Single Vision',
-              'Bifocal (Moon Shape)',
-              'Bifocal (D Shape)',
-              'Progressive',
-            ].map((type) => (
+          <div className="grid grid-cols-2 gap-3">
+            {['Single Vision', 'Bifocal (Moon Shape)', 'Bifocal (D Shape)', 'Progressive'].map((type) => (
               <button
                 key={type}
                 type="button"
-                onClick={() => setPowerType(type)}
-                className={`py-2.5 px-3 text-xs font-semibold rounded-xl border flex items-center justify-between transition ${
-                  powerType === type
-                    ? 'border-emerald-600 bg-emerald-50/50 text-emerald-800 ring-1 ring-emerald-600'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                onClick={() => setSelectedType(type)}
+                className={`p-3 rounded-2xl border text-sm font-bold text-left transition flex items-center justify-between ${
+                  selectedType === type
+                    ? 'bg-emerald-500/15 border-emerald-500 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+                    : 'bg-slate-800/40 border-slate-700/60 text-slate-300 hover:border-cyan-500/40'
                 }`}
               >
                 <span>{type}</span>
-                {powerType === type && (
-                  <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">
-                    ✓
-                  </span>
-                )}
+                {selectedType === type && <span className="text-emerald-400 text-base">✓</span>}
               </button>
             ))}
           </div>
         </div>
 
-        {/* 3. Select Lens Quality Dropdown */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+        {/* সেকশন ২: SELECT LENS QUALITY */}
+        <div className="mb-6">
+          <label className="text-xs font-bold text-cyan-300 uppercase tracking-widest block mb-3">
             Select Lens Quality
           </label>
           <select
             value={lensQuality}
             onChange={(e) => setLensQuality(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-slate-800/90 border border-cyan-500/30 rounded-2xl p-3.5 text-cyan-200 font-bold focus:border-cyan-400 focus:outline-none transition cursor-pointer"
           >
-            <option value="White Glass">White Glass</option>
-            <option value="Multi Coated Glass">Multi Coated Glass</option>
-            <option value="Photochromic Glass">Photochromic Glass</option>
-            <option value="Blue Cut Glass">Blue Cut Glass</option>
-            <option value="Blue Cut Photosun Glass">Blue Cut Photosun Glass</option>
+            <option value="White" className="bg-slate-900 text-white">White</option>
+            <option value="Multicoated" className="bg-slate-900 text-white">Multicoated</option>
+            <option value="Photosun" className="bg-slate-900 text-white">Photosun</option>
+            <option value="Multicoated Photosun" className="bg-slate-900 text-white">Multicoated Photosun</option>
+            <option value="Blue Cut" className="bg-slate-900 text-white">Blue Cut</option>
+            <option value="Photosun Blue Cut" className="bg-slate-900 text-white">Photosun Blue Cut</option>
           </select>
         </div>
 
-        {/* 4. Green Notice Box */}
-        <div className="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-center">
-          <p className="text-[11px] font-semibold text-emerald-700">
-            পাওয়ারের মান জানতে আপনার পাওয়ার প্রিসক্রিপশন কার্ড দেখুন
+        {/* গাইডেন্স মেসেজ */}
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl mb-6 text-center">
+          <p className="text-xs font-bold text-emerald-400">
+            💡 পাওয়ারের মান জানতে আপনার পাওয়ার প্রেসক্রিপশন কার্ড দেখুন অথবা ছবি আপলোড করুন
           </p>
         </div>
 
-        {/* 5. Prescription Inputs (OD & OS) */}
-        <div className="space-y-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+        {/* পাওয়ার ইনপুট গ্রিড */}
+        <div className="space-y-4 mb-6 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+          
           {/* Right Eye (OD) */}
           <div>
-            <span className="text-[11px] font-bold text-slate-700 block mb-1">Right Eye (OD)</span>
-            <div className="grid grid-cols-4 gap-1.5">
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">SPH</span>
-                <input
-                  type="text"
-                  value={rightSph}
-                  onChange={(e) => setRightSph(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">CYL</span>
-                <input
-                  type="text"
-                  value={rightCyl}
-                  onChange={(e) => setRightCyl(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">AXIS</span>
-                <input
-                  type="text"
-                  value={rightAxis}
-                  onChange={(e) => setRightAxis(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">ADD</span>
-                <input
-                  type="text"
-                  value={rightAdd}
-                  onChange={(e) => setRightAdd(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
+            <div className="text-xs font-bold text-cyan-400 uppercase mb-2">Right Eye (OD)</div>
+            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+              <span className="text-slate-400 font-bold">SPH</span>
+              <span className="text-slate-400 font-bold">CYL</span>
+              <span className="text-slate-400 font-bold">AXIS</span>
+              <span className="text-slate-400 font-bold">ADD</span>
+              
+              <input type="text" value={rightSph} onChange={(e) => setRightSph(e.target.value)} className="bg-slate-900 border border-slate-700 text-cyan-300 p-2 rounded-xl text-center font-bold focus:border-cyan-400 focus:outline-none" />
+              <input type="text" value={rightCyl} onChange={(e) => setRightCyl(e.target.value)} className="bg-slate-900 border border-slate-700 text-cyan-300 p-2 rounded-xl text-center font-bold focus:border-cyan-400 focus:outline-none" />
+              <input type="text" value={rightAxis} onChange={(e) => setRightAxis(e.target.value)} className="bg-slate-900 border border-slate-700 text-cyan-300 p-2 rounded-xl text-center font-bold focus:border-cyan-400 focus:outline-none" />
+              <input type="text" value={rightAdd} onChange={(e) => setRightAdd(e.target.value)} className="bg-slate-900 border border-slate-700 text-cyan-300 p-2 rounded-xl text-center font-bold focus:border-cyan-400 focus:outline-none" />
             </div>
           </div>
+
+          <hr className="border-slate-800/80 my-2" />
 
           {/* Left Eye (OS) */}
           <div>
-            <span className="text-[11px] font-bold text-slate-700 block mb-1">Left Eye (OS)</span>
-            <div className="grid grid-cols-4 gap-1.5">
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">SPH</span>
-                <input
-                  type="text"
-                  value={leftSph}
-                  onChange={(e) => setLeftSph(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">CYL</span>
-                <input
-                  type="text"
-                  value={leftCyl}
-                  onChange={(e) => setLeftCyl(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">AXIS</span>
-                <input
-                  type="text"
-                  value={leftAxis}
-                  onChange={(e) => setLeftAxis(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase">ADD</span>
-                <input
-                  type="text"
-                  value={leftAdd}
-                  onChange={(e) => setLeftAdd(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-center font-medium"
-                />
-              </div>
+            <div className="text-xs font-bold text-pink-400 uppercase mb-2">Left Eye (OS)</div>
+            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+              <span className="text-slate-400 font-bold">SPH</span>
+              <span className="text-slate-400 font-bold">CYL</span>
+              <span className="text-slate-400 font-bold">AXIS</span>
+              <span className="text-slate-400 font-bold">ADD</span>
+              
+              <input type="text" value={leftSph} onChange={(e) => setLeftSph(e.target.value)} className="bg-slate-900 border border-slate-700 text-pink-300 p-2 rounded-xl text-center font-bold focus:border-pink-400 focus:outline-none" />
+              <input type="text" value={leftCyl} onChange={(e) => setLeftCyl(e.target.value)} className="bg-slate-900 border border-slate-700 text-pink-300 p-2 rounded-xl text-center font-bold focus:border-pink-400 focus:outline-none" />
+              <input type="text" value={leftAxis} onChange={(e) => setLeftAxis(e.target.value)} className="bg-slate-900 border border-slate-700 text-pink-300 p-2 rounded-xl text-center font-bold focus:border-pink-400 focus:outline-none" />
+              <input type="text" value={leftAdd} onChange={(e) => setLeftAdd(e.target.value)} className="bg-slate-900 border border-slate-700 text-pink-300 p-2 rounded-xl text-center font-bold focus:border-pink-400 focus:outline-none" />
             </div>
+          </div>
+
+        </div>
+
+        {/* প্রেসক্রিপশন ছবি আপলোড করার বাটন */}
+        <div className="mb-8">
+          <label className="text-xs font-bold text-cyan-300 uppercase tracking-widest block mb-2">
+            Upload Prescription Image
+          </label>
+          <div className="flex items-center gap-3">
+            <label className="flex-1 flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-800 border border-dashed border-cyan-500/50 text-cyan-300 py-3 px-4 rounded-2xl cursor-pointer transition">
+              <span className="text-xl">📷</span>
+              <span className="text-sm font-bold">
+                {fileName ? fileName : 'Upload Prescription Photo'}
+              </span>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+                className="hidden" 
+              />
+            </label>
           </div>
         </div>
 
-        {/* 6. Upload Photo Option */}
-        <div>
-          <span className="text-[10px] text-slate-400 font-bold block text-center mb-1.5">
-            Or Upload Prescription
-          </span>
-          <button
-            type="button"
-            className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-700 flex items-center justify-center gap-2 transition"
-          >
-            📤 Upload Photo
-          </button>
-        </div>
-
-        {/* 7. WhatsApp Button & Privacy */}
-        <div className="space-y-2 pt-1">
-          <button
-            type="button"
-            onClick={handleOrder}
-            className="w-full bg-[#00A884] hover:bg-[#008f70] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/20 text-sm"
-          >
-            💬 Price on WhatsApp
-          </button>
-          <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
-            🔒 আপনার তথ্য নিরাপদ ও গোপন থাকবে
-          </p>
-        </div>
+        {/* হোয়াটসঅ্যাপ সাবমিট বাটন */}
+        <button 
+          onClick={handleSubmitToWhatsApp}
+          className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:scale-[1.01] transition active:scale-[0.99] flex items-center justify-center gap-2 text-lg"
+        >
+          <span>💬</span> SEND PRESCRIPTION TO WHATSAPP →
+        </button>
 
       </div>
     </div>
