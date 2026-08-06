@@ -116,7 +116,7 @@ export default function AddProductPage() {
         imageUrl = publicUrlData.publicUrl;
       }
 
-      // Save Data to Supabase Table (Fixed column mapping)
+      // Save Data to Supabase Table
       const { error: insertError } = await supabase.from('products').insert([
         {
           name: form.name,
@@ -130,7 +130,7 @@ export default function AddProductPage() {
           lens_color: form.category === 'Contact Lenses' ? form.lens_color : 'None',
           description: form.description,
           stock_status: form.stock_status,
-          featured: form.featured, // 🔥 Corrected here!
+          featured: form.featured,
           image_url: imageUrl,
         },
       ]);
@@ -249,11 +249,12 @@ export default function AddProductPage() {
                 onChange={handleInput}
                 className="w-full bg-slate-950 border border-blue-600/50 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500 transition font-medium"
               >
-                <option value="Frames">Glasses / Frames</option>
+                <option value="Frames">Frames</option>
                 <option value="Baby Frames">Baby Frames</option>
                 <option value="Sunglasses">Sunglasses</option>
                 <option value="Power Glasses">Power Glasses</option>
                 <option value="Contact Lenses">Contact Lenses</option>
+                <option value="Accessories">Accessories</option>
               </select>
             </div>
 

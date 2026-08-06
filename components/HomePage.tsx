@@ -1,8 +1,47 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  image_url: string;
+  featured: boolean;
+}
 
 export default function HomePage() {
+  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Supabase থেকে পপুলার প্রোডাক্ট ফেচ করার ইফেক্ট
+  useEffect(() => {
+    const fetchPopularProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('featured', true);
+
+        if (error) throw error;
+        if (data) setPopularProducts(data);
+      } catch (err) {
+        console.error('Error fetching popular products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPopularProducts();
+  }, []);
+
   return (
     <main className="min-h-screen text-white relative overflow-hidden bg-[#080d1a]">
       {/* Background Cyan Glow Shapes */}
@@ -56,6 +95,70 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* 🌟 Popular Products Section (এখন দেখাবে!) */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-10 border-b border-cyan-500/20 pb-4">
+            <span className="text-3xl text-yellow-400">🌟</span>
+            <h2 className="text-3xl md:text-4xl font-black text-yellow-300 tracking-wide">
+              Popular Products
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-10 text-slate-400 font-semibold">
+              ⏳ Loading Popular Products...
+            </div>
+          ) : popularProducts.length === 0 ? (
+            <div className="text-center py-10 text-slate-400 font-semibold bg-slate-900/50 rounded-2xl border border-slate-800">
+              কোনো Popular Product যুক্ত করা হয়নি। Admin Panel থেকে "Popular Product (হোম পেজে দেখাবে)" সিলেক্ট করে প্রোডাক্ট যোগ করুন।
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {popularProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="glass-panel p-4 rounded-2xl border border-cyan-500/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between"
+                >
+                  <div className="w-full h-48 bg-slate-900 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-slate-800">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-4xl">👓</span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1">
+                      {product.category}
+                    </span>
+                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-xl font-black text-emerald-400 mb-4">
+                      ৳ {product.price}
+                    </p>
+                  </div>
+                  <a
+                    href={`https://wa.me/8801779666030?text=Hello,%20I%20want%20to%20buy%20${encodeURIComponent(
+                      product.name
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-center text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20"
+                  >
+                    <span>💬</span> Order via WhatsApp
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
