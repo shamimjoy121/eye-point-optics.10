@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Header from '@/components/header';
-import Navbar from '@/components/Navbar';
+import Header from '../components/header';
+import Navbar from '../components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Eye Point Optics | আই পয়েন্ট অপটিক্স',
