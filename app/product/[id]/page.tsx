@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../../supabaseClient';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 
@@ -10,7 +10,7 @@ interface Product {
   id: number;
   name: string;
   price: number;
-  img: string;
+  image_url: string;
   category: string;
   description?: string;
 }
@@ -57,7 +57,7 @@ export default function ProductDetailsPage() {
 
 🛍️ নাম: ${product.name}
 💰 দাম: ৳${product.price}
-🖼️ ছবি: ${product.img}`
+🖼️ ছবি: ${product.image_url}`
     );
 
     window.open(
@@ -89,7 +89,8 @@ export default function ProductDetailsPage() {
     );
   }
 
-  return (<div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
       <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-2xl">
         <div
           className="flex items-center gap-2 cursor-pointer"
@@ -115,7 +116,7 @@ export default function ProductDetailsPage() {
           <div className="bg-slate-950 rounded-2xl p-6 flex items-center justify-center border border-slate-800/60 min-h-[350px] cursor-zoom-in">
             <Zoom>
               <img
-                src={product.img}
+                src={product.image_url || '/placeholder.png'}
                 alt={product.name}
                 className="max-h-80 max-w-full object-contain rounded-xl"
               />
