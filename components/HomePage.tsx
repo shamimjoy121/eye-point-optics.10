@@ -21,6 +21,9 @@ export default function HomePage() {
   const [popularProducts, setPopularProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // জুম মোডাল নিয়ন্ত্রণ করার স্টেট
+  const [activeZoomImage, setActiveZoomImage] = useState<string | null>(null);
+
   // Supabase থেকে পপুলার প্রোডাক্ট ফেচ করার ইফেক্ট
   useEffect(() => {
     const fetchPopularProducts = async () => {
@@ -98,7 +101,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 🌟 Popular Products Section (এখন দেখাবে!) */}
+      {/* 🌟 Popular Products Section */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center gap-3 mb-10 border-b border-cyan-500/20 pb-4">
@@ -123,38 +126,50 @@ export default function HomePage() {
                   key={product.id}
                   className="glass-panel p-4 rounded-2xl border border-cyan-500/30 hover:-translate-y-1 transition duration-300 flex flex-col justify-between"
                 >
-                  <div className="w-full h-48 bg-slate-900 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-slate-800">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-4xl">👓</span>
-                    )}
-                  </div>
                   <div>
-                    <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1">
-                      {product.category}
-                    </span>
-                    <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">
-                      {product.name}
-                    </h3>
+                    {/* ছবি কন্টেইনার - ক্লিক করলে জুম হবে */}
+                    <div 
+                      onClick={() => product.image_url && setActiveZoomImage(product.image_url)}
+                      className="relative w-full h-48 bg-slate-900 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-slate-800 cursor-pointer group"
+                    >
+                      {product.image_url ? (
+                        <>
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                            <span className="bg-cyan-950/80 text-cyan-300 text-xs px-2.5 py-1 rounded-full border border-cyan-500/30 font-semibold">
+                              🔍 জুম করুন
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-4xl">👓</span>
+                      )}
+                    </div>
+
+                    <Link href={`/product/${product.id}`}>
+                      <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1">
+                        {product.category}
+                      </span>
+                      <h3 className="text-lg font-bold text-white mb-2 line-clamp-1 hover:text-cyan-300 transition">
+                        {product.name}
+                      </h3>
+                    </Link>
+
                     <p className="text-xl font-black text-emerald-400 mb-4">
                       ৳ {product.price}
                     </p>
                   </div>
-                  <a
-                    href={`https://wa.me/8801779666030?text=Hello,%20I%20want%20to%20buy%20${encodeURIComponent(
-                      product.name
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-center text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20"
+
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-center text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-600/20"
                   >
-                    <span>💬</span> Order via WhatsApp
-                  </a>
+                    <span>👓</span> View Details
+                  </Link>
                 </div>
               ))}
             </div>
@@ -173,7 +188,6 @@ export default function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Frames */}
             <Link
               href="/frames"
               className="group glass-panel p-6 hover:-translate-y-1 transition duration-300"
@@ -187,7 +201,6 @@ export default function HomePage() {
               </p>
             </Link>
 
-            {/* Baby Frames */}
             <Link
               href="/baby-frames"
               className="group glass-panel p-6 hover:-translate-y-1 transition duration-300"
@@ -201,7 +214,6 @@ export default function HomePage() {
               </p>
             </Link>
 
-            {/* Sunglasses */}
             <Link
               href="/sunglasses"
               className="group glass-panel p-6 hover:-translate-y-1 transition duration-300"
@@ -215,7 +227,6 @@ export default function HomePage() {
               </p>
             </Link>
 
-            {/* Power Glasses */}
             <Link
               href="/power-glasses"
               className="group glass-panel p-6 hover:-translate-y-1 transition duration-300"
@@ -229,7 +240,6 @@ export default function HomePage() {
               </p>
             </Link>
 
-            {/* Contact Lenses */}
             <Link
               href="/contact-lenses"
               className="group glass-panel p-6 hover:-translate-y-1 transition duration-300"
@@ -243,7 +253,6 @@ export default function HomePage() {
               </p>
             </Link>
 
-            {/* Accessories */}
             <Link
               href="/accessories"
               className="group glass-panel p-6 hover:-translate-y-1 transition duration-300 border-cyan-400/40"
@@ -259,6 +268,36 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ফুল স্ক্রিন পপআপ জুম মোডাল */}
+      {activeZoomImage && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
+          onClick={() => setActiveZoomImage(null)}
+        >
+          <button
+            onClick={() => setActiveZoomImage(null)}
+            className="absolute top-6 right-6 text-white text-2xl font-bold bg-slate-800 hover:bg-slate-700 w-12 h-12 rounded-full flex items-center justify-center border border-slate-600 transition z-10"
+          >
+            ✕
+          </button>
+
+          <div
+            className="relative max-w-4xl max-h-[85vh] flex items-center justify-center p-2 bg-slate-900 rounded-3xl border border-cyan-500/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={activeZoomImage}
+              alt="Zoomed Product"
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl"
+            />
+          </div>
+
+          <p className="mt-4 text-xs text-slate-400">
+            বন্ধ করতে যেকোনো স্থানে ক্লিক করুন
+          </p>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-cyan-500/20 py-10 text-center relative z-10 space-y-3 bg-slate-950/60 backdrop-blur-md">

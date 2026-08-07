@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '../../../supabaseClient';
-import Zoom from 'react-medium-image-zoom';
-import 'react-medium-image-zoom/dist/styles.css';
 
 interface Product {
   id: number;
@@ -13,6 +11,7 @@ interface Product {
   image_url: string;
   category: string;
   description?: string;
+  standard_images_urls?: string[];
 }
 
 export default function ProductDetailsPage() {
@@ -22,7 +21,11 @@ export default function ProductDetailsPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // আপনার WhatsApp নম্বর
+  // জুম মোডাল এবং থাম্বনেইল স্টেট
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+
+  // WhatsApp নম্বর
   const whatsappNumber = '8801779666030';
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export default function ProductDetailsPage() {
         console.error(error);
       } else {
         setProduct(data);
+        setSelectedImageUrl(data.image_url);
       }
 
       setLoading(false);
@@ -51,19 +55,10 @@ export default function ProductDetailsPage() {
     if (!product) return;
 
     const text = encodeURIComponent(
-      `হ্যালো EP OPTICS!
-
-আমি এই পণ্যটি অর্ডার করতে চাই।
-
-🛍️ নাম: ${product.name}
-💰 দাম: ৳${product.price}
-🖼️ ছবি: ${product.image_url}`
+      `হ্যালো EP OPTICS!\n\nআমি এই পণ্যটি অর্ডার করতে চাই।\n\n🛍️ নাম: ${product.name}\n💰 দাম: ৳${product.price}\n🖼️ ছবি: ${selectedImageUrl || product.image_url}`
     );
 
-    window.open(
-      `https://wa.me/${whatsappNumber}?text=${text}`,
-      '_blank'
-    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${text}`, '_blank');
   };
 
   if (loading) {
@@ -78,16 +73,17 @@ export default function ProductDetailsPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white gap-4">
         <h2>Product not found</h2>
-
         <button
           onClick={() => router.push('/')}
-          className="bg-blue-600 px-5 py-2 rounded-lg"
+          className="bg-blue-600 px-5 py-2 rounded-lg text-white"
         >
           Home
         </button>
       </div>
     );
   }
+
+  const productImages = product.image_url ? [product.image_url] : ['/placeholder.png'];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
@@ -110,39 +106,75 @@ export default function ProductDetailsPage() {
         </button>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-12 md:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-10 shadow-2xl">
+      <main className="max-w-7xl mx-auto px-6 py-12 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 p-6 md:p-10">
 
-          <div className="bg-slate-950 rounded-2xl p-6 flex items-center justify-center border border-slate-800/60 min-h-[350px] cursor-zoom-in">
-            <Zoom>
+          {/* বড় ছবি সেকশন */}
+          <div className="space-y-6 flex flex-col items-center">
+            <div
+              onClick={() => setIsFullScreen(true)}
+              className="relative w-full max-w-lg aspect-square bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-800/60 shadow-2xl overflow-hidden cursor-pointer group"
+            >
               <img
-                src={product.image_url || '/placeholder.png'}
+                src={selectedImageUrl || product.image_url || '/placeholder.png'}
                 alt={product.name}
-                className="max-h-80 max-w-full object-contain rounded-xl"
+                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
               />
-            </Zoom>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFullScreen(true);
+                }}
+                className="absolute bottom-4 right-4 text-xs text-black bg-white/80 hover:bg-white px-3 py-1.5 rounded-full border border-black/20 shadow-md transition flex items-center gap-1.5 font-medium"
+              >
+                🔍 বড় করে দেখুন
+              </button>
+            </div>
+
+            {/* থাম্বনেইল ছবি */}
+            <div className="flex gap-4 items-center justify-center pt-2 max-w-md w-full">
+              {productImages.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImageUrl(img)}
+                  className={`w-20 md:w-24 aspect-square bg-white p-2 rounded-2xl border-2 transition overflow-hidden shadow-md ${
+                    selectedImageUrl === img ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-800'
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`thumbnail-${index}`}
+                    className="w-full h-full object-contain rounded-lg"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <span className="px-3 py-1 bg-blue-900/40 border border-blue-800/60 rounded-full text-xs font-semibold tracking-wider text-blue-400 uppercase">
+          {/* বিবরণ ও অর্ডার সেকশন */}
+          <div className="flex flex-col justify-between space-y-8 bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-xl">
+            <div className="space-y-6">
+              <span className="px-3 py-1 bg-emerald-900/40 border border-emerald-800/60 rounded-full text-xs font-semibold tracking-wider text-emerald-400 uppercase">
                 {product.category} Collection
               </span>
 
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-wide">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-wide">
                 {product.name}
               </h1>
 
-              <p className="text-3xl font-black text-blue-400">
-                ৳{product.price}
-              </p>
+              <div className="space-y-1">
+                <p className="text-4xl font-black text-emerald-400">
+                  ৳{product.price}
+                </p>
+              </div>
 
-              <div className="pt-4 border-t border-slate-800 space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <div className="pt-6 border-t border-slate-800 space-y-4">
+                <h4 className="text-sm font-bold text-slate-300 uppercase tracking-widest">
                   চশমার বিবরণ ও বৈশিষ্ট্য
                 </h4>
 
-                <p className="text-sm text-slate-300 leading-relaxed">
+                <p className="text-sm md:text-base text-slate-300 leading-relaxed">
                   {product.description ??
                     'এটি একটি প্রিমিয়াম কোয়ালিটির আসল চশমা। এর ফ্রেমটি অত্যন্ত লাইটওয়েট এবং মজবুত। UV Protection গ্লাস ব্যবহৃত হয়েছে।'}
                 </p>
@@ -151,7 +183,7 @@ export default function ProductDetailsPage() {
 
             <button
               onClick={handleWhatsAppOrder}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-6 rounded-2xl transition flex items-center justify-center gap-3 text-base"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-6 rounded-2xl transition flex items-center justify-center gap-3 text-lg shadow-lg"
             >
               💬 WhatsApp এ অর্ডার করুন
             </button>
@@ -159,6 +191,36 @@ export default function ProductDetailsPage() {
 
         </div>
       </main>
+
+      {/* ফুল স্ক্রিন পপআপ (Lightbox Zoom) */}
+      {isFullScreen && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 md:p-10"
+          onClick={() => setIsFullScreen(false)}
+        >
+          <button
+            onClick={() => setIsFullScreen(false)}
+            className="absolute top-6 right-6 text-white text-2xl font-bold bg-slate-800/80 hover:bg-slate-700 w-12 h-12 rounded-full flex items-center justify-center border border-slate-600 transition z-10"
+          >
+            ✕
+          </button>
+
+          <div
+            className="relative max-w-5xl max-h-[85vh] flex items-center justify-center p-4 bg-white rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={selectedImageUrl || product.image_url || '/placeholder.png'}
+              alt={product.name}
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl"
+            />
+          </div>
+
+          <p className="mt-4 text-sm text-slate-400">
+            বন্ধ করতে যেকোনো স্থানে ক্লিক করুন
+          </p>
+        </div>
+      )}
     </div>
   );
 }
